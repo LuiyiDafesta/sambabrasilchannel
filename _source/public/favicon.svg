@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <!-- Outer Dark Badge matching group design -->
+  <rect x="8" y="8" width="496" height="496" rx="108" ry="108" fill="#0C0C0C"/>
+  <!-- Inner Green Stroke in Brand Verde Brasil #159447 -->
+  <rect x="28" y="28" width="456" height="456" rx="88" ry="88" fill="none" stroke="#159447" stroke-width="14"/>
+  <!-- Centered SB typography: S in pure white #FFFFFF, B in brand green #159447 -->
+  <g id="letters" transform="translate(256, 335)" text-anchor="middle" font-family="'Outfit', 'Arial Black', sans-serif" font-weight="900" font-size="246" letter-spacing="-2">
+    <text x="-80" fill="#FFFFFF">S</text>
+    <text x="80" fill="#159447">B</text>
+  </g>
+</svg>

@@ -1,14 +1,11 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
-  <defs>
-    <linearGradient id="sbGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#009c3b" />
-      <stop offset="50%" stop-color="#ffdf00" />
-      <stop offset="100%" stop-color="#002776" />
-    </linearGradient>
-  </defs>
-  <rect width="100" height="100" rx="24" fill="#091220" />
-  <circle cx="50" cy="50" r="42" fill="none" stroke="url(#sbGrad)" stroke-width="4" />
-  <path d="M 30 50 Q 50 20 70 50 Q 50 80 30 50 Z" fill="#ffdf00" />
-  <circle cx="50" cy="50" r="14" fill="#002776" />
-  <path d="M 38 50 Q 50 45 62 50" stroke="#ffffff" stroke-width="2.5" fill="none" stroke-linecap="round" />
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <!-- Outer Dark Badge matching group design -->
+  <rect x="8" y="8" width="496" height="496" rx="108" ry="108" fill="#0C0C0C"/>
+  <!-- Inner Green Stroke in Brand Verde Brasil #159447 -->
+  <rect x="28" y="28" width="456" height="456" rx="88" ry="88" fill="none" stroke="#159447" stroke-width="14"/>
+  <!-- Centered SB typography: S in pure white #FFFFFF, B in brand green #159447 -->
+  <g id="letters" transform="translate(256, 335)" text-anchor="middle" font-family="'Outfit', 'Arial Black', sans-serif" font-weight="900" font-size="246" letter-spacing="-2">
+    <text x="-80" fill="#FFFFFF">S</text>
+    <text x="80" fill="#159447">B</text>
+  </g>
 </svg>

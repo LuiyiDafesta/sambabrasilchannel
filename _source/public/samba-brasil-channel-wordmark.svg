@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 140" width="100%" height="100%" fill="none">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@900&amp;display=swap');
+      .wordmark-text {
+        font-family: 'Outfit', -apple-system, sans-serif;
+        font-weight: 900;
+        font-size: 112px;
+        text-transform: uppercase;
+        letter-spacing: -1.5px;
+        dominant-baseline: middle;
+      }
+    </style>
+  </defs>
+  <text y="78" class="wordmark-text">
+    <tspan fill="#FFFFFF">SAMBA</tspan>
+    <tspan fill="#159447">BRASIL</tspan>
+    <tspan fill="#FFFFFF">CHANNEL</tspan>
+  </text>
+</svg>
