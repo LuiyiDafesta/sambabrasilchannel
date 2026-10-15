@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /config/
+Disallow: /_source/
+Disallow: /upload_b2.php
+
+Sitemap: https://sambabrasilchannel.com.ar/sitemap.xml

@@ -1,0 +1,34 @@
+DirectoryIndex index.html index.php
+
+# Security: Hide development folders, source code, configs, and internal docs
+RedirectMatch 404 ^/\.git
+RedirectMatch 404 ^/\.agents
+RedirectMatch 404 ^/_source
+RedirectMatch 404 ^/\.env
+RedirectMatch 404 ^/config
+RedirectMatch 404 ^/backup_
+RedirectMatch 404 \.bak$
+RedirectMatch 404 ^/\.gitignore$
+RedirectMatch 404 ^/skills-lock\.json$
+RedirectMatch 404 ^/task\.md$
+RedirectMatch 404 ^/walkthrough\.md$
+RedirectMatch 404 ^/implementation_plan\.md$
+RedirectMatch 404 ^/FEROZO_DEPLOY_WORKFLOW\.md$
+
+# MIME types & Performance
+<IfModule mod_mime.c>
+  AddType application/javascript .js
+  AddType text/css .css
+  AddType image/svg+xml .svg
+  AddType image/webp .webp
+</IfModule>
+
+# SPA Routing for client-side navigation
+<IfModule mod_rewrite.c>
+  RewriteEngine On
+  RewriteBase /
+  RewriteRule ^index\.html$ - [L]
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteRule . /index.html [L]
+</IfModule>

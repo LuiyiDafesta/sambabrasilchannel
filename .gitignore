@@ -1,0 +1,33 @@
+# Environment variables and secrets (NEVER commit secrets to repository)
+.env
+.env.*
+!.env.example
+_source/.env
+_source/.env.*
+!_source/.env.example
+
+# Sensitive server configurations
+config/b2_credentials.php
+config/*.secret.php
+config/credentials.json
+
+# Dependencies
+node_modules/
+_source/node_modules/
+
+# Logs and system
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.DS_Store
+Thumbs.db
+
+# Vite / build cache
+_source/dist/
+.eslintcache
+.turbo
+
+# Temporary backups
+*.bak
+backup_/
