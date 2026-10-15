@@ -1,13 +1,14 @@
-export type TransportType = 'airplane' | 'bus';
+export type TransportType = 'airplane';
 export type VueltaStatus = 'borrador' | 'publicada' | 'cerrada';
 export type PhotoCategory = 'todas' | 'momentos' | 'destino' | 'carnaval';
 
 export interface Vuelta {
   id: string;
   code: string; // e.g. "SB-102"
-  date: string; // YYYY-MM-DD e.g. "2026-10-14"
-  transport_type: TransportType;
-  transport_details?: string; // e.g. "Vuelo Charter AR-1920" o "Micro Doble Piso Plus"
+  date: string; // YYYY-MM-DD e.g. "2026-11-14"
+  destination: string; // "Camboriú"
+  transport_type: TransportType; // Siempre avión
+  transport_details?: string; // e.g. "Vuelo Charter Aerolíneas / Gol"
   coordinator_name: string;
   status: VueltaStatus;
   cover_image: string;
@@ -29,11 +30,11 @@ export interface Colegio {
 export interface Fotografia {
   id: string;
   vuelta_id: string;
-  url: string; // Full CDN URL
+  url: string;
   thumbnail_url?: string;
   category: 'momentos' | 'destino' | 'carnaval';
   filename: string;
-  file_size?: number; // bytes
+  file_size?: number;
   created_at: string;
 }
 

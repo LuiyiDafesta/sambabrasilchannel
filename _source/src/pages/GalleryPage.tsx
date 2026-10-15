@@ -122,31 +122,35 @@ export const GalleryPage: React.FC = () => {
             
             {/* Left: Transport Icon + Title + Coordinator */}
             <div className="flex items-start gap-4">
-              <div className="w-16 h-16 rounded-2xl bg-[#124DA0]/20 border border-[#124DA0]/40 text-[#4082e6] flex items-center justify-center shrink-0">
-                {trip.transport_type === 'airplane' ? <Plane size={32} className="text-[#F8C62B]" /> : <Bus size={32} className="text-[#159447]" />}
+              <div className="w-16 h-16 rounded-2xl bg-[#159447]/20 border border-[#159447]/40 text-[#159447] flex items-center justify-center shrink-0">
+                <Plane size={32} className="text-[#F8C62B]" />
               </div>
               <div>
-                <h1 className="font-outfit font-black text-3xl sm:text-4xl text-white tracking-tight">
-                  Viaje {trip.code}
+                <span className="text-[11px] font-bold uppercase tracking-wider text-[#F8C62B] block">
+                  Vuelo Oficial a Camboriú, Brasil
+                </span>
+                <h1 className="font-outfit font-black text-2xl sm:text-4xl text-white tracking-tight mt-0.5">
+                  Álbum del {trip.date}
                 </h1>
                 <div className="flex flex-wrap items-center gap-3 text-xs text-slate-400 mt-1">
-                  <span className="flex items-center gap-1 font-mono">
-                    <Calendar size={13} className="text-[#159447]" /> {trip.date}
-                  </span>
+                  <span>Coordinación: <strong className="text-slate-200">{trip.coordinator_name}</strong></span>
                   <span>&bull;</span>
-                  <span>Coordinador: <strong className="text-slate-200">{trip.coordinator_name}</strong></span>
+                  <span className="text-slate-400 font-mono">Vuelo: {trip.code}</span>
                 </div>
               </div>
             </div>
 
-            {/* Center: Colegios List */}
-            <div className="bg-[#121D32] border border-white/5 rounded-2xl p-4 w-full lg:w-auto min-w-[280px]">
-              <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">
-                Colegios en este viaje:
+            {/* Center: Colegios List (Highlighted Box) */}
+            <div className="bg-[#121D32] border border-[#159447]/40 rounded-2xl p-4 w-full lg:w-auto min-w-[300px]">
+              <div className="flex items-center justify-between gap-2 mb-2">
+                <span className="text-[11px] font-bold text-[#159447] uppercase tracking-wider">
+                  Colegios de este grupo:
+                </span>
+                <span className="text-[10px] text-slate-400">Álbum compartido</span>
               </div>
               <ul className="space-y-1">
                 {trip.schools.map((sch) => (
-                  <li key={sch.id} className="text-xs text-slate-200 flex items-center justify-between gap-4">
+                  <li key={sch.id} className="text-xs text-slate-200 flex items-center justify-between gap-4 font-semibold">
                     <span className="flex items-center gap-1.5">
                       <span className="w-1.5 h-1.5 rounded-full bg-[#159447]" />
                       {sch.name}

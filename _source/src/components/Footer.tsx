@@ -47,10 +47,10 @@ export const Footer: React.FC = () => {
 
           {/* Card 3: Experiencia SambaBrasilChannel */}
           <a
-            href="#buscar"
+            href="#buscador-calendario"
             onClick={(e) => {
               e.preventDefault();
-              const el = document.getElementById('buscar-viaje') || document.getElementById('hero');
+              const el = document.getElementById('buscador-calendario') || document.getElementById('hero');
               el?.scrollIntoView({ behavior: 'smooth' });
             }}
             className="flex flex-col items-center justify-center text-center p-8 rounded-2xl border border-[#159447] bg-[#0A101A] hover:bg-[#0D1624] transition-all duration-300 group shadow-[0_0_20px_rgba(21,148,71,0.12)] hover:shadow-[0_0_30px_rgba(21,148,71,0.28)] transform hover:-translate-y-1 cursor-pointer"
