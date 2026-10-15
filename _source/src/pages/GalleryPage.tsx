@@ -26,7 +26,6 @@ export const GalleryPage: React.FC = () => {
 
   const [trip, setTrip] = useState<Vuelta | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'todas' | 'momentos' | 'destino' | 'carnaval'>('todas');
   const [selectedPhotoIds, setSelectedPhotoIds] = useState<Set<string>>(new Set());
   const [activeLightboxPhoto, setActiveLightboxPhoto] = useState<Fotografia | null>(null);
   const [downloadSuccess, setDownloadSuccess] = useState(false);
@@ -70,11 +69,8 @@ export const GalleryPage: React.FC = () => {
     );
   }
 
-  // Filter photos based on active category tab
-  const filteredPhotos = trip.photos.filter((p) => {
-    if (activeTab === 'todas') return true;
-    return p.category === activeTab;
-  });
+  // All photos without categories or filters ("todas al montón")
+  const allPhotos = trip.photos;
 
   const toggleSelectPhoto = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
@@ -88,10 +84,10 @@ export const GalleryPage: React.FC = () => {
   };
 
   const selectAllPhotos = () => {
-    if (selectedPhotoIds.size === filteredPhotos.length) {
+    if (selectedPhotoIds.size === allPhotos.length) {
       setSelectedPhotoIds(new Set());
     } else {
-      setSelectedPhotoIds(new Set(filteredPhotos.map((p) => p.id)));
+      setSelectedPhotoIds(new Set(allPhotos.map((p) => p.id)));
     }
   };
 
@@ -130,7 +126,7 @@ export const GalleryPage: React.FC = () => {
                   Vuelo Oficial a Camboriú, Brasil
                 </span>
                 <h1 className="font-outfit font-black text-2xl sm:text-4xl text-white tracking-tight mt-0.5">
-                  Álbum del {trip.date}
+                  Álbum &bull; Ingreso a Camboriú {trip.date}
                 </h1>
                 <div className="flex flex-wrap items-center gap-3 text-xs text-slate-400 mt-1">
                   <span>Coordinación: <strong className="text-slate-200">{trip.coordinator_name}</strong></span>
@@ -193,67 +189,33 @@ export const GalleryPage: React.FC = () => {
           )}
         </div>
 
-        {/* FILTER TABS & SELECTION BAR */}
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-8">
-          {/* Category Tabs */}
-          <div className="flex items-center bg-[#0C1424] p-1.5 rounded-2xl border border-white/10 w-full sm:w-auto overflow-x-auto">
-            <button
-              onClick={() => setActiveTab('todas')}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
-                activeTab === 'todas'
-                  ? 'bg-[#124DA0] text-white shadow-md'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              Todas las fotos
-            </button>
-            <button
-              onClick={() => setActiveTab('momentos')}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
-                activeTab === 'momentos'
-                  ? 'bg-[#124DA0] text-white shadow-md'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              Momentos del viaje
-            </button>
-            <button
-              onClick={() => setActiveTab('destino')}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
-                activeTab === 'destino'
-                  ? 'bg-[#124DA0] text-white shadow-md'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              En el destino
-            </button>
-            <button
-              onClick={() => setActiveTab('carnaval')}
-              className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap cursor-pointer ${
-                activeTab === 'carnaval'
-                  ? 'bg-[#124DA0] text-white shadow-md'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              Carnaval & Fiestas
-            </button>
+        {/* SELECTION BAR & PHOTO COUNT (Sin filtros de categorías, todas las fotos juntas al montón) */}
+        <div className="flex items-center justify-between gap-4 mb-6 pb-4 border-b border-white/10">
+          <div className="flex items-center gap-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#159447] shadow-[0_0_8px_#159447]" />
+            <h2 className="font-outfit font-black text-lg text-white">
+              Fotografías del Viaje
+            </h2>
+            <span className="text-xs font-mono text-slate-400 ml-2">
+              ({trip.photos.length} fotos)
+            </span>
           </div>
 
           {/* Quick Select All Toggle */}
-          <div className="flex items-center gap-3 w-full sm:w-auto justify-end text-xs text-slate-400">
+          <div className="flex items-center gap-3 text-xs text-slate-300">
             <button
               onClick={selectAllPhotos}
-              className="hover:text-white underline font-semibold cursor-pointer"
+              className="hover:text-white underline font-semibold cursor-pointer py-1 px-2 rounded-lg hover:bg-white/5 transition-colors"
             >
-              {selectedPhotoIds.size === filteredPhotos.length ? 'Deseleccionar todas' : 'Seleccionar todas'}
+              {selectedPhotoIds.size === trip.photos.length ? 'Deseleccionar todas' : 'Seleccionar todas'}
             </button>
           </div>
         </div>
 
-        {/* PHOTO GRID */}
-        {filteredPhotos.length > 0 ? (
+        {/* PHOTO GRID - TODAS LAS FOTOS JUNTAS AL MONTÓN */}
+        {allPhotos.length > 0 ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 mb-16">
-            {filteredPhotos.map((photo) => {
+            {allPhotos.map((photo) => {
               const isSelected = selectedPhotoIds.has(photo.id);
               return (
                 <div
@@ -284,11 +246,6 @@ export const GalleryPage: React.FC = () => {
                   >
                     <Check size={14} className={isSelected ? 'opacity-100' : 'opacity-0'} />
                   </button>
-
-                  {/* Category Badge on Bottom Left */}
-                  <div className="absolute bottom-2.5 left-2.5 text-[10px] font-bold uppercase tracking-wider text-white bg-black/60 px-2 py-0.5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity">
-                    {photo.category}
-                  </div>
                 </div>
               );
             })}
@@ -296,8 +253,8 @@ export const GalleryPage: React.FC = () => {
         ) : (
           <div className="text-center py-20 bg-[#0C1424] rounded-3xl border border-white/10 mb-16">
             <Camera size={36} className="text-slate-500 mx-auto mb-3" />
-            <h3 className="text-lg font-bold text-white mb-1">No hay fotos en esta categoría</h3>
-            <p className="text-xs text-slate-400">Probá seleccionando la pestaña "Todas las fotos".</p>
+            <h3 className="text-lg font-bold text-white mb-1">No hay fotos publicadas en este álbum todavía</h3>
+            <p className="text-xs text-slate-400">Las fotos estarán disponibles en las próximas horas.</p>
           </div>
         )}
 

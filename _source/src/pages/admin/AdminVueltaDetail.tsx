@@ -234,7 +234,7 @@ export const AdminVueltaDetail: React.FC = () => {
               <strong className="text-white text-base font-outfit">{trip.code}</strong>
             </div>
             <div>
-              <span className="text-slate-400 block mb-1">Fecha de Regreso:</span>
+              <span className="text-slate-400 block mb-1">Fecha de Ingreso a Camboriú:</span>
               <strong className="text-white">{trip.date}</strong>
             </div>
             <div>

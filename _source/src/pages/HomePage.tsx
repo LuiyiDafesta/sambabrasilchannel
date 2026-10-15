@@ -212,9 +212,9 @@ export const HomePage: React.FC = () => {
             <div className="w-12 h-12 rounded-xl bg-[#F8C62B]/15 text-[#F8C62B] flex items-center justify-center mb-4">
               <Users size={22} />
             </div>
-            <h3 className="font-outfit font-bold text-lg text-white mb-2">2. Marcá el Día y tu Colegio</h3>
+            <h3 className="font-outfit font-bold text-lg text-white mb-2">2. Marcá el Día de Ingreso y tu Colegio</h3>
             <p className="text-xs text-slate-400 leading-relaxed">
-              Hacé clic en el día de regreso destacado en verde para ver el recuadro con los colegios que viajaron en ese vuelo.
+              Hacé clic en el día de ingreso a Camboriú destacado en verde para ver el recuadro con los colegios que integran ese vuelo.
             </p>
           </div>
 

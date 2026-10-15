@@ -191,7 +191,7 @@ export const TripCalendarSearch: React.FC<TripCalendarSearchProps> = ({
           {/* STEP 1: SELECT MONTH (Noviembre 2026 / Diciembre 2026 / Enero 2027) */}
           <div className="mb-6">
             <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
-              1. Seleccioná el mes de regreso:
+              1. Seleccioná el mes de ingreso a Camboriú:
             </label>
             <div className="grid grid-cols-3 gap-2.5 sm:gap-4">
               {availableMonths.map((m) => {
@@ -221,12 +221,12 @@ export const TripCalendarSearch: React.FC<TripCalendarSearchProps> = ({
               <div className="flex items-center gap-2">
                 <CalendarIcon size={16} className="text-[#159447]" />
                 <h4 className="font-outfit font-bold text-sm sm:text-base text-white">
-                  Calendario de {currentMonthData.label}
+                  Calendario de Ingresos &bull; {currentMonthData.label}
                 </h4>
               </div>
               <span className="text-[11px] text-slate-400 flex items-center gap-1.5">
                 <span className="w-2.5 h-2.5 rounded-full bg-[#159447] shadow-[0_0_8px_#159447]" />
-                Días con vuelos disponibles
+                Días de ingreso a Camboriú
               </span>
             </div>
 
@@ -284,7 +284,7 @@ export const TripCalendarSearch: React.FC<TripCalendarSearchProps> = ({
           {selectedDay && (
             <div className="animate-fadeIn">
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">
-                3. Vuelos y Colegios del {selectedDay} de {currentMonthData.label}:
+                3. Vuelos con ingreso el {selectedDay} de {currentMonthData.label}:
               </label>
 
               {tripsOnSelectedDay.length > 0 ? (
@@ -306,7 +306,7 @@ export const TripCalendarSearch: React.FC<TripCalendarSearchProps> = ({
                               Vuelo Oficial a Camboriú
                             </span>
                             <h4 className="font-outfit font-black text-lg text-white">
-                              Regreso del {selectedDay} de {currentMonthData.label}
+                              Ingreso a Camboriú: {selectedDay} de {currentMonthData.label}
                             </h4>
                           </div>
                         </div>

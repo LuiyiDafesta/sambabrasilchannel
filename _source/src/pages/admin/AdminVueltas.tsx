@@ -219,7 +219,7 @@ export const AdminVueltas: React.FC = () => {
               </div>
 
               <div>
-                <label className="block text-slate-300 font-semibold mb-1">Fecha de Regreso</label>
+                <label className="block text-slate-300 font-semibold mb-1">Fecha de Ingreso a Camboriú</label>
                 <input
                   type="date"
                   required
