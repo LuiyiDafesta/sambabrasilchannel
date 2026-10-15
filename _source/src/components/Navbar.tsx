@@ -136,10 +136,9 @@ export const Navbar: React.FC = () => {
             <button
               type="button"
               onClick={() => scrollToSection('buscador-calendario')}
-              className="bg-[#159447] hover:bg-[#117739] text-white font-outfit font-black text-xs lg:text-sm uppercase tracking-wider px-5 lg:px-7 py-2.5 rounded-full shadow-[0_0_22px_rgba(21,148,71,0.45)] hover:shadow-[0_0_32px_rgba(21,148,71,0.65)] hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer whitespace-nowrap"
+              className="bg-[#159447] hover:bg-[#117739] text-white font-outfit font-black text-xs md:text-[13px] uppercase tracking-wider px-5 lg:px-6 py-2.5 rounded-full shadow-[0_0_22px_rgba(21,148,71,0.45)] hover:shadow-[0_0_32px_rgba(21,148,71,0.65)] hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer whitespace-nowrap"
             >
-              <span className="hidden xl:inline">EXPERIENCIA SAMBA BRASIL CHANNEL</span>
-              <span className="inline xl:hidden">EXPERIENCIA SAMBA BRASIL</span>
+              EXPERIENCIA SAMBA BRASIL CHANNEL
             </button>
           </div>
 
