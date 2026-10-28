@@ -35,8 +35,49 @@ export async function uploadImage(file: File, folder: string = 'gallery'): Promi
 }
 
 export function getCdnUrl(objectKey: string): string {
+  if (!objectKey) return '';
+  // If it already uses the configured CDN base
+  if (objectKey.startsWith(CDN_BASE_URL)) {
+    return objectKey;
+  }
+  // If it's a direct Backblaze B2 public URL, rewrite to CDN URL to leverage Cloudflare caching
+  const b2Match = objectKey.match(/https?:\/\/[^\/]+\/file\/[^\/]+\/(.+)/);
+  if (b2Match && b2Match[1]) {
+    return `${CDN_BASE_URL}/${b2Match[1]}`;
+  }
+  // If already an absolute http/https URL that is not Backblaze
   if (objectKey.startsWith('http://') || objectKey.startsWith('https://')) {
     return objectKey;
   }
+  // Otherwise append path to CDN_BASE_URL
   return `${CDN_BASE_URL}/${objectKey.replace(/^\/+/, '')}`;
+}
+
+/**
+ * Downloads a single photo directly without compression
+ */
+export async function downloadDirectPhoto(url: string, filename: string): Promise<void> {
+  const cdnUrl = getCdnUrl(url);
+  try {
+    const res = await fetch(cdnUrl, { mode: 'cors' });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const blob = await res.blob();
+    const blobUrl = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = blobUrl;
+    link.download = filename || 'foto-sambabrasil.jpg';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 1500);
+  } catch (err) {
+    // Direct anchor fallback
+    const link = document.createElement('a');
+    link.href = cdnUrl;
+    link.download = filename || 'foto-sambabrasil.jpg';
+    link.target = '_blank';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
 }
