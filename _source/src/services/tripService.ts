@@ -177,6 +177,199 @@ export const tripService = {
   },
 
   /**
+   * Delete a complete trip / group (cascades to schools and photos)
+   */
+  async deleteTrip(vueltaId: string): Promise<boolean> {
+    try {
+      const { error } = await supabase.from('vueltas').delete().eq('id', vueltaId);
+      if (error) {
+        console.error('[TripService] Error deleting trip:', error.message);
+      }
+    } catch (err) {
+      console.warn('[TripService] Delete trip fallback:', err);
+    }
+    localTrips = localTrips.filter((t) => t.id !== vueltaId && t.code !== vueltaId);
+    localStats.vueltas_total = Math.max(0, localStats.vueltas_total - 1);
+    return true;
+  },
+
+  /**
+   * Create a new Group with its list of schools
+   */
+  async createGroupWithSchools(payload: {
+    code: string;
+    date: string;
+    destination: string;
+    schoolNames: string[];
+  }): Promise<Vuelta> {
+    const vueltaId = `v-${Date.now()}`;
+    const cleanCode = payload.code.trim().toUpperCase() || `SB-${Math.floor(100 + Math.random() * 900)}`;
+    const destination = payload.destination.trim() || 'Camboriú';
+    const date = payload.date || new Date().toISOString().split('T')[0];
+
+    const vueltaData = {
+      id: vueltaId,
+      code: cleanCode,
+      date,
+      destination,
+      transport_type: 'airplane',
+      transport_details: 'Vuelo Privado',
+      coordinator_name: 'Coordinador General',
+      status: 'publicada',
+      cover_image:
+        'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80',
+    };
+
+    try {
+      const { data: vData, error: vErr } = await supabase
+        .from('vueltas')
+        .insert([vueltaData])
+        .select()
+        .single();
+
+      if (!vErr && vData) {
+        const schoolsPayload = payload.schoolNames
+          .map((n) => n.trim())
+          .filter(Boolean)
+          .map((name, idx) => ({
+            id: `sch-${Date.now()}-${idx}-${Math.random().toString(36).substring(2, 5)}`,
+            vuelta_id: vueltaId,
+            contract_code: `CT-${Math.floor(1000 + Math.random() * 9000)}`,
+            name,
+            pax_count: 0,
+            city: destination,
+          }));
+
+        if (schoolsPayload.length > 0) {
+          await supabase.from('schools').insert(schoolsPayload);
+        }
+
+        const freshTrip = await this.getTripById(vueltaId);
+        if (freshTrip) return freshTrip;
+      }
+    } catch (err) {
+      console.error('[TripService] createGroupWithSchools error:', err);
+    }
+
+    const fallbackSchools: Colegio[] = payload.schoolNames
+      .map((n) => n.trim())
+      .filter(Boolean)
+      .map((name, idx) => ({
+        id: `sch-${Date.now()}-${idx}`,
+        vuelta_id: vueltaId,
+        contract_code: `CT-${1000 + idx}`,
+        name,
+        pax_count: 0,
+        city: destination,
+      }));
+
+    const newVuelta: Vuelta = {
+      ...vueltaData,
+      schools: fallbackSchools,
+      photos: [],
+      photo_count: 0,
+      total_pax: 0,
+    };
+    localTrips.unshift(newVuelta);
+    localStats.vueltas_total += 1;
+    return newVuelta;
+  },
+
+  /**
+   * Update an existing Group and synchronize its schools
+   */
+  async updateGroupWithSchools(
+    vueltaId: string,
+    payload: {
+      code: string;
+      date: string;
+      destination: string;
+      schoolNames: string[];
+    }
+  ): Promise<Vuelta | null> {
+    const cleanCode = payload.code.trim().toUpperCase();
+    const destination = payload.destination.trim() || 'Camboriú';
+    const date = payload.date;
+
+    try {
+      await supabase
+        .from('vueltas')
+        .update({
+          code: cleanCode,
+          date,
+          destination,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', vueltaId);
+
+      // Re-synchronize schools: delete old, insert new
+      await supabase.from('schools').delete().eq('vuelta_id', vueltaId);
+
+      const schoolsPayload = payload.schoolNames
+        .map((n) => n.trim())
+        .filter(Boolean)
+        .map((name, idx) => ({
+          id: `sch-${Date.now()}-${idx}-${Math.random().toString(36).substring(2, 5)}`,
+          vuelta_id: vueltaId,
+          contract_code: `CT-${Math.floor(1000 + Math.random() * 9000)}`,
+          name,
+          pax_count: 0,
+          city: destination,
+        }));
+
+      if (schoolsPayload.length > 0) {
+        await supabase.from('schools').insert(schoolsPayload);
+      }
+
+      return await this.getTripById(vueltaId);
+    } catch (err) {
+      console.error('[TripService] updateGroupWithSchools error:', err);
+    }
+
+    const trip = localTrips.find((t) => t.id === vueltaId || t.code === vueltaId);
+    if (trip) {
+      trip.code = cleanCode;
+      trip.date = date;
+      trip.destination = destination;
+      trip.schools = payload.schoolNames
+        .map((n) => n.trim())
+        .filter(Boolean)
+        .map((name, idx) => ({
+          id: `sch-${Date.now()}-${idx}`,
+          vuelta_id: vueltaId,
+          contract_code: `CT-${1000 + idx}`,
+          name,
+          pax_count: 0,
+          city: destination,
+        }));
+      return trip;
+    }
+    return null;
+  },
+
+  /**
+   * Set photo as group cover
+   */
+  async setCoverPhoto(vueltaId: string, photoUrl: string): Promise<boolean> {
+    try {
+      const { error } = await supabase
+        .from('vueltas')
+        .update({ cover_image: photoUrl })
+        .eq('id', vueltaId);
+      if (!error) return true;
+    } catch (err) {
+      console.error('[TripService] setCoverPhoto error:', err);
+    }
+
+    const trip = localTrips.find((t) => t.id === vueltaId || t.code === vueltaId);
+    if (trip) {
+      trip.cover_image = photoUrl;
+      return true;
+    }
+    return false;
+  },
+
+  /**
    * Delete school from trip
    */
   async removeSchool(vueltaId: string, schoolId: string): Promise<boolean> {

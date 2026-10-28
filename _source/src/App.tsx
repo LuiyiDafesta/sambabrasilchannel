@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useParams } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { ProtectedRoute } from './components/auth/ProtectedRoute';
 import { Navbar } from './components/Navbar';
@@ -7,14 +7,8 @@ import { Footer } from './components/Footer';
 import { HomePage } from './pages/HomePage';
 import { SearchPage } from './pages/SearchPage';
 import { GalleryPage } from './pages/GalleryPage';
-import { AdminLayout } from './pages/admin/AdminLayout';
 import { AdminLogin } from './pages/admin/AdminLogin';
-import { AdminDashboard } from './pages/admin/AdminDashboard';
-import { AdminVueltas } from './pages/admin/AdminVueltas';
-import { AdminVueltaDetail } from './pages/admin/AdminVueltaDetail';
-import { AdminColegios } from './pages/admin/AdminColegios';
-import { AdminFotografias } from './pages/admin/AdminFotografias';
-import { AdminEstadisticas } from './pages/admin/AdminEstadisticas';
+import { AdminControlConsole } from './pages/admin/AdminControlConsole';
 
 function PublicLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -24,6 +18,11 @@ function PublicLayout({ children }: { children: React.ReactNode }) {
       <Footer />
     </div>
   );
+}
+
+function AdminVueltaRedirect() {
+  const { code } = useParams<{ code: string }>();
+  return <Navigate to={`/admin?galeria=${code || ''}`} replace />;
 }
 
 export default function App() {
@@ -65,19 +64,19 @@ export default function App() {
             path="/admin"
             element={
               <ProtectedRoute>
-                <AdminLayout />
+                <AdminControlConsole />
               </ProtectedRoute>
             }
-          >
-            <Route index element={<AdminDashboard />} />
-            <Route path="vueltas" element={<AdminVueltas />} />
-            <Route path="vueltas/:code" element={<AdminVueltaDetail />} />
-            <Route path="colegios" element={<AdminColegios />} />
-            <Route path="fotografias" element={<AdminFotografias />} />
-            <Route path="estadisticas" element={<AdminEstadisticas />} />
-            {/* Backward-compatibility redirect for coordinadores */}
-            <Route path="coordinadores" element={<Navigate to="/admin/vueltas" replace />} />
-          </Route>
+          />
+
+          {/* Backward compatibility and deep-linking redirects */}
+          <Route path="/admin/colegios" element={<Navigate to="/admin" replace />} />
+          <Route path="/admin/vueltas" element={<Navigate to="/admin" replace />} />
+          <Route path="/admin/vueltas/:code" element={<AdminVueltaRedirect />} />
+          <Route path="/admin/dashboard" element={<Navigate to="/admin" replace />} />
+          <Route path="/admin/fotografias" element={<Navigate to="/admin" replace />} />
+          <Route path="/admin/estadisticas" element={<Navigate to="/admin" replace />} />
+          <Route path="/admin/coordinadores" element={<Navigate to="/admin" replace />} />
 
           {/* Catch-all redirect */}
           <Route path="*" element={<Navigate to="/" replace />} />
