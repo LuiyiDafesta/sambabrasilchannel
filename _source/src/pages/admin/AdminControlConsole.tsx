@@ -3,7 +3,6 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Plus,
   Search,
-  Filter,
   Copy,
   Check,
   Calendar,
@@ -278,7 +277,6 @@ export const AdminControlConsole: React.FC = () => {
           }
         } catch (uploadErr) {
           console.warn('[Queue Upload] PHP/B2 upload failed, using local CDN fallback:', uploadErr);
-          // Fallback if local without PHP: create object URL or standard CDN path
           uploadedUrl = URL.createObjectURL(nextItem.file);
         }
 
@@ -361,15 +359,15 @@ export const AdminControlConsole: React.FC = () => {
   const uniqueDestinations = Array.from(new Set(trips.map((t) => t.destination || 'Camboriú')));
 
   return (
-    <div className="min-h-screen bg-[#070D18] text-slate-100 flex flex-col font-sans selection:bg-[#F8C62B] selection:text-black">
+    <div className="min-h-screen bg-[#070D18] text-slate-100 flex flex-col font-sans selection:bg-[#159447] selection:text-white">
       {/* ============================================================ */}
-      {/* 1. TOP HEADER CONSOLE (Exact match to Image 1, 3, 4) */}
+      {/* 1. TOP HEADER CONSOLE (Verde Samba Brasil #159447) */}
       {/* ============================================================ */}
       <header className="bg-[#090F1C] border-b border-white/10 px-4 sm:px-8 py-5">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-white/5 border border-white/10 text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1.5">
-              <span className="text-[#F8C62B]">✦</span>
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#159447]/10 border border-[#159447]/30 text-[10px] font-bold uppercase tracking-wider text-[#159447] mb-1.5">
+              <span>✦</span>
               <span>PANEL ADMINISTRATIVO</span>
             </div>
             <h1 className="font-outfit font-black text-2xl sm:text-3xl lg:text-4xl uppercase tracking-tight text-white leading-none">
@@ -381,7 +379,7 @@ export const AdminControlConsole: React.FC = () => {
             <button
               type="button"
               onClick={openCreateModal}
-              className="bg-[#F8C62B] hover:bg-[#e6b522] text-black font-outfit font-black text-xs sm:text-sm uppercase tracking-wider px-5 py-2.5 rounded-xl shadow-[0_0_20px_rgba(248,198,43,0.3)] hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-2 cursor-pointer"
+              className="bg-[#159447] hover:bg-[#117739] text-white font-outfit font-black text-xs sm:text-sm uppercase tracking-wider px-5 py-2.5 rounded-xl shadow-[0_0_20px_rgba(21,148,71,0.35)] hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center gap-2 cursor-pointer"
             >
               <Plus size={16} strokeWidth={3} />
               <span>REGISTRAR COLEGIO</span>
@@ -401,10 +399,10 @@ export const AdminControlConsole: React.FC = () => {
       </header>
 
       {/* ============================================================ */}
-      {/* 2. MAIN NAVIGATION TABS (Image 1, 4) */}
+      {/* 2. MAIN NAVIGATION TABS (CENTRADO A LO ANCHO - Verde #159447) */}
       {/* ============================================================ */}
       <div className="bg-[#070D18] px-4 sm:px-8 pt-6 pb-2">
-        <div className="max-w-7xl mx-auto flex flex-wrap items-center gap-2.5 sm:gap-4 border-b border-white/10 pb-4">
+        <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-center gap-3 sm:gap-5 border-b border-white/10 pb-4">
           {/* TAB 1: GESTIÓN DE COLEGIOS */}
           <button
             type="button"
@@ -412,10 +410,10 @@ export const AdminControlConsole: React.FC = () => {
               setActiveTab('colegios');
               handleCloseGallery();
             }}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-outfit font-black uppercase tracking-wider transition-all cursor-pointer ${
+            className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs sm:text-sm font-outfit font-black uppercase tracking-wider transition-all cursor-pointer ${
               activeTab === 'colegios'
-                ? 'bg-[#F8C62B] text-black shadow-[0_0_20px_rgba(248,198,43,0.35)]'
-                : 'bg-[#101726] hover:bg-[#152033] text-slate-300 border border-white/5'
+                ? 'bg-[#159447] text-white shadow-[0_0_22px_rgba(21,148,71,0.45)] border border-[#159447]'
+                : 'bg-[#101726] hover:bg-[#152338] text-slate-300 hover:text-white border border-white/5 hover:border-[#159447]/30'
             }`}
           >
             <Database size={15} />
@@ -426,10 +424,10 @@ export const AdminControlConsole: React.FC = () => {
           <button
             type="button"
             onClick={() => setActiveTab('encuestas')}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-outfit font-black uppercase tracking-wider transition-all cursor-pointer ${
+            className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs sm:text-sm font-outfit font-black uppercase tracking-wider transition-all cursor-pointer ${
               activeTab === 'encuestas'
-                ? 'bg-[#F8C62B] text-black shadow-[0_0_20px_rgba(248,198,43,0.35)]'
-                : 'bg-[#101726] hover:bg-[#152033] text-slate-400 hover:text-slate-200 border border-white/5'
+                ? 'bg-[#159447] text-white shadow-[0_0_22px_rgba(21,148,71,0.45)] border border-[#159447]'
+                : 'bg-[#101726] hover:bg-[#152338] text-slate-400 hover:text-slate-200 border border-white/5 hover:border-[#159447]/30'
             }`}
           >
             <Sparkles size={15} />
@@ -440,10 +438,10 @@ export const AdminControlConsole: React.FC = () => {
           <button
             type="button"
             onClick={() => setActiveTab('estadisticas')}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-outfit font-black uppercase tracking-wider transition-all cursor-pointer ${
+            className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs sm:text-sm font-outfit font-black uppercase tracking-wider transition-all cursor-pointer ${
               activeTab === 'estadisticas'
-                ? 'bg-[#F8C62B] text-black shadow-[0_0_20px_rgba(248,198,43,0.35)]'
-                : 'bg-[#101726] hover:bg-[#152033] text-slate-400 hover:text-slate-200 border border-white/5'
+                ? 'bg-[#159447] text-white shadow-[0_0_22px_rgba(21,148,71,0.45)] border border-[#159447]'
+                : 'bg-[#101726] hover:bg-[#152338] text-slate-400 hover:text-slate-200 border border-white/5 hover:border-[#159447]/30'
             }`}
           >
             <BarChart3 size={15} />
@@ -459,7 +457,7 @@ export const AdminControlConsole: React.FC = () => {
         {/* VIEW: ENCUESTAS PLACEHOLDER */}
         {activeTab === 'encuestas' && (
           <div className="bg-[#0C1424] border border-white/10 rounded-3xl p-12 text-center max-w-xl mx-auto my-8">
-            <div className="w-16 h-16 rounded-2xl bg-[#F8C62B]/10 border border-[#F8C62B]/30 text-[#F8C62B] flex items-center justify-center mx-auto mb-4">
+            <div className="w-16 h-16 rounded-2xl bg-[#159447]/10 border border-[#159447]/30 text-[#159447] flex items-center justify-center mx-auto mb-4">
               <Sparkles size={28} />
             </div>
             <h3 className="font-outfit font-black text-xl text-white uppercase tracking-wider mb-2">
@@ -468,7 +466,7 @@ export const AdminControlConsole: React.FC = () => {
             <p className="text-slate-400 text-xs sm:text-sm leading-relaxed mb-6">
               Módulo preparado para encuestas de satisfacción, votación de fiestas temáticas y feedback de egresados de Samba Brasil.
             </p>
-            <span className="inline-flex px-3 py-1 rounded-full bg-[#159447]/10 border border-[#159447]/30 text-[#159447] text-xs font-bold uppercase">
+            <span className="inline-flex px-3 py-1 rounded-full bg-[#159447]/15 border border-[#159447]/40 text-[#159447] text-xs font-bold uppercase">
               Próximamente disponible
             </span>
           </div>
@@ -486,7 +484,7 @@ export const AdminControlConsole: React.FC = () => {
             <p className="text-slate-400 text-xs sm:text-sm leading-relaxed mb-6">
               Visualización de visualizaciones de fotos, descargas HD, colegios registrados y actividad en tiempo real.
             </p>
-            <span className="inline-flex px-3 py-1 rounded-full bg-[#F8C62B]/10 border border-[#F8C62B]/30 text-[#F8C62B] text-xs font-bold uppercase">
+            <span className="inline-flex px-3 py-1 rounded-full bg-[#159447]/15 border border-[#159447]/40 text-[#159447] text-xs font-bold uppercase">
               Próximamente disponible
             </span>
           </div>
@@ -497,13 +495,13 @@ export const AdminControlConsole: React.FC = () => {
           <>
             {activeGalleryTrip ? (
               /* ============================================================ */
-              /* SUBVIEW: GALERÍA DEL GRUPO (Exact match to Image 3) */
+              /* SUBVIEW: GALERÍA DEL GRUPO (Verde Samba Brasil) */
               /* ============================================================ */
               <div className="space-y-6 animate-fadeIn">
                 {/* Group Top Meta Card */}
                 <div className="bg-[#0B111D] border border-white/10 rounded-3xl p-6 sm:p-8 flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-2xl">
                   <div>
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-[#F8C62B] block mb-1">
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-[#159447] block mb-1">
                       ADMINISTRANDO GALERÍA DEL GRUPO
                     </span>
                     <h2 className="font-outfit font-black text-2xl sm:text-3xl text-white uppercase leading-tight mb-3">
@@ -512,7 +510,7 @@ export const AdminControlConsole: React.FC = () => {
                         : activeGalleryTrip.code}
                     </h2>
                     <div className="flex flex-wrap items-center gap-3 text-xs">
-                      <span className="bg-[#F8C62B]/10 border border-[#F8C62B]/30 text-[#F8C62B] font-bold px-2.5 py-1 rounded-lg">
+                      <span className="bg-[#159447]/15 border border-[#159447]/40 text-[#159447] font-bold px-2.5 py-1 rounded-lg">
                         CÓDIGO: {activeGalleryTrip.code}
                       </span>
                       <span className="text-slate-400 flex items-center gap-1.5">
@@ -540,7 +538,7 @@ export const AdminControlConsole: React.FC = () => {
                     <button
                       type="button"
                       onClick={handleCloseGallery}
-                      className="bg-[#F8C62B] hover:bg-[#e6b522] text-black font-outfit font-black text-xs uppercase px-4 py-2.5 rounded-xl shadow-[0_0_15px_rgba(248,198,43,0.3)] transition-all flex items-center gap-2 cursor-pointer"
+                      className="bg-[#159447] hover:bg-[#117739] text-white font-outfit font-black text-xs uppercase px-4 py-2.5 rounded-xl shadow-[0_0_15px_rgba(21,148,71,0.3)] transition-all flex items-center gap-2 cursor-pointer"
                     >
                       <ArrowLeft size={14} />
                       <span>VOLVER A COLEGIOS</span>
@@ -558,7 +556,7 @@ export const AdminControlConsole: React.FC = () => {
                         <span>NIVEL DE GRUPO</span>
                       </div>
                       <h3 className="font-outfit font-black text-lg sm:text-xl text-white uppercase flex items-center gap-2">
-                        <ImageIcon size={18} className="text-[#F8C62B]" />
+                        <ImageIcon size={18} className="text-[#159447]" />
                         <span>GALERÍA DE FOTOS GRUPALES ({activeGalleryTrip.photos?.length || 0})</span>
                       </h3>
                       <p className="text-xs text-slate-400 mt-0.5">
@@ -578,7 +576,7 @@ export const AdminControlConsole: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => fileInputRef.current?.click()}
-                        className="bg-[#F8C62B] hover:bg-[#e6b522] text-black font-outfit font-black text-xs uppercase px-4 py-2.5 rounded-xl shadow-[0_0_15px_rgba(248,198,43,0.3)] flex items-center gap-2 cursor-pointer transition-all"
+                        className="bg-[#159447] hover:bg-[#117739] text-white font-outfit font-black text-xs uppercase px-4 py-2.5 rounded-xl shadow-[0_0_15px_rgba(21,148,71,0.3)] flex items-center gap-2 cursor-pointer transition-all"
                       >
                         <UploadCloud size={15} />
                         <span>SUBIR FOTOS GRUPALES HD</span>
@@ -594,9 +592,9 @@ export const AdminControlConsole: React.FC = () => {
                       handleFilesSelected(e.dataTransfer.files);
                     }}
                     onClick={() => fileInputRef.current?.click()}
-                    className="border-2 border-dashed border-white/15 hover:border-[#F8C62B]/50 bg-black/20 hover:bg-black/30 rounded-2xl p-8 text-center cursor-pointer transition-all group"
+                    className="border-2 border-dashed border-white/15 hover:border-[#159447]/60 bg-black/20 hover:bg-black/30 rounded-2xl p-8 text-center cursor-pointer transition-all group"
                   >
-                    <div className="w-12 h-12 rounded-full bg-white/5 border border-white/10 group-hover:border-[#F8C62B]/40 flex items-center justify-center mx-auto text-[#F8C62B] mb-3 group-hover:scale-110 transition-transform">
+                    <div className="w-12 h-12 rounded-full bg-white/5 border border-white/10 group-hover:border-[#159447]/40 flex items-center justify-center mx-auto text-[#159447] mb-3 group-hover:scale-110 transition-transform">
                       <UploadCloud size={22} />
                     </div>
                     <h4 className="font-outfit font-black text-xs sm:text-sm text-white uppercase tracking-wider mb-1">
@@ -612,7 +610,7 @@ export const AdminControlConsole: React.FC = () => {
                     <div className="bg-[#0D1524] border border-white/10 rounded-2xl p-4 space-y-2">
                       <div className="flex items-center justify-between text-xs font-bold text-slate-300">
                         <span className="flex items-center gap-2">
-                          {isProcessingQueue && <Loader2 size={13} className="animate-spin text-[#F8C62B]" />}
+                          {isProcessingQueue && <Loader2 size={13} className="animate-spin text-[#159447]" />}
                           <span>Cola de subida secuencial ({uploadQueue.filter((q) => q.status === 'completed').length}/{uploadQueue.length})</span>
                         </span>
                         {uploadQueue.some((q) => q.status === 'completed' || q.status === 'error') && (
@@ -636,8 +634,8 @@ export const AdminControlConsole: React.FC = () => {
                             <div className="flex items-center gap-2">
                               {item.status === 'pending' && <span className="text-slate-500">En cola</span>}
                               {item.status === 'uploading' && (
-                                <span className="text-[#F8C62B] flex items-center gap-1">
-                                  <Loader2 size={11} className="animate-spin" /> Subiendo a Backblaze...
+                                <span className="text-[#159447] flex items-center gap-1 font-semibold">
+                                  <Loader2 size={11} className="animate-spin text-[#159447]" /> Subiendo a Backblaze...
                                 </span>
                               )}
                               {item.status === 'completed' && (
@@ -655,7 +653,7 @@ export const AdminControlConsole: React.FC = () => {
                     </div>
                   )}
 
-                  {/* Horizontal / Responsive Photos Grid (Image 3) */}
+                  {/* Horizontal / Responsive Photos Grid */}
                   <div>
                     {activeGalleryTrip.photos && activeGalleryTrip.photos.length > 0 ? (
                       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
@@ -679,7 +677,7 @@ export const AdminControlConsole: React.FC = () => {
                                 </span>
 
                                 {isCover ? (
-                                  <span className="bg-[#F8C62B] text-black text-[10px] font-black uppercase px-2 py-0.5 rounded-md shadow-md flex items-center gap-1">
+                                  <span className="bg-[#159447] text-white text-[10px] font-black uppercase px-2 py-0.5 rounded-md shadow-md flex items-center gap-1">
                                     <Star size={10} fill="currentColor" />
                                     PORTADA OFICIAL
                                   </span>
@@ -687,7 +685,7 @@ export const AdminControlConsole: React.FC = () => {
                                   <button
                                     type="button"
                                     onClick={() => handleSetCoverPhoto(photo.url)}
-                                    className="pointer-events-auto opacity-0 group-hover:opacity-100 bg-black/80 hover:bg-[#F8C62B] text-slate-300 hover:text-black text-[10px] font-bold px-2 py-0.5 rounded-md border border-white/10 transition-all flex items-center gap-1"
+                                    className="pointer-events-auto opacity-0 group-hover:opacity-100 bg-black/80 hover:bg-[#159447] text-slate-300 hover:text-white text-[10px] font-bold px-2 py-0.5 rounded-md border border-white/10 transition-all flex items-center gap-1"
                                     title="Marcar como foto de portada"
                                   >
                                     <Star size={10} />
@@ -737,10 +735,10 @@ export const AdminControlConsole: React.FC = () => {
               </div>
             ) : (
               /* ============================================================ */
-              /* SUBVIEW: TABLA PRINCIPAL DE GRUPOS (Exact match to Image 1, 4, 5) */
+              /* SUBVIEW: TABLA PRINCIPAL DE GRUPOS (Verde Samba Brasil) */
               /* ============================================================ */
               <div className="space-y-4">
-                {/* Search & Filter Bar (Image 1, 4, 5) */}
+                {/* Search & Filter Bar */}
                 <div className="bg-[#0B101C] border border-white/10 rounded-2xl p-3 sm:p-4 flex flex-col md:flex-row items-center justify-between gap-3 shadow-xl">
                   {/* Search Input */}
                   <div className="relative w-full md:w-96">
@@ -753,7 +751,7 @@ export const AdminControlConsole: React.FC = () => {
                         setCurrentPage(1);
                       }}
                       placeholder="Buscar colegio por nombre o destino..."
-                      className="w-full bg-[#121826] border border-white/10 rounded-xl pl-9 pr-3.5 py-2 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-[#F8C62B] transition-all"
+                      className="w-full bg-[#121826] border border-white/10 rounded-xl pl-9 pr-3.5 py-2 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-[#159447] transition-all"
                     />
                   </div>
 
@@ -761,7 +759,7 @@ export const AdminControlConsole: React.FC = () => {
                   <div className="flex items-center gap-2.5 w-full md:w-auto justify-end">
                     <button
                       type="button"
-                      className="bg-[#121826] border border-white/10 hover:border-white/20 text-slate-300 px-3.5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-all"
+                      className="bg-[#121826] border border-white/10 hover:border-[#159447]/40 text-slate-300 hover:text-white px-3.5 py-2 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 transition-all"
                     >
                       <SlidersHorizontal size={13} />
                       <span>FILTROS</span>
@@ -775,7 +773,7 @@ export const AdminControlConsole: React.FC = () => {
                           setDestinationFilter(e.target.value);
                           setCurrentPage(1);
                         }}
-                        className="bg-[#121826] border border-white/10 rounded-xl px-3.5 py-2 text-xs text-white appearance-none pr-8 focus:outline-none focus:border-[#F8C62B]"
+                        className="bg-[#121826] border border-white/10 rounded-xl px-3.5 py-2 text-xs text-white appearance-none pr-8 focus:outline-none focus:border-[#159447]"
                       >
                         <option value="all">Todos los Destinos</option>
                         {uniqueDestinations.map((d) => (
@@ -787,12 +785,12 @@ export const AdminControlConsole: React.FC = () => {
                       <ChevronDown size={13} className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
                     </div>
 
-                    {/* Page Size Selector Popup (Image 5) */}
+                    {/* Page Size Selector Popup */}
                     <div className="relative">
                       <button
                         type="button"
                         onClick={() => setPageSizeOpen(!pageSizeOpen)}
-                        className="bg-[#121826] border border-white/10 hover:border-white/20 text-slate-200 px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5"
+                        className="bg-[#121826] border border-white/10 hover:border-[#159447]/40 text-slate-200 px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5"
                       >
                         <span className="text-slate-400">VER</span>
                         <strong className="text-white">{pageSize}</strong>
@@ -812,7 +810,7 @@ export const AdminControlConsole: React.FC = () => {
                               }}
                               className={`w-full text-center py-1.5 text-xs font-bold transition-colors ${
                                 pageSize === size
-                                  ? 'bg-white/15 text-white'
+                                  ? 'bg-[#159447] text-white'
                                   : 'text-slate-300 hover:bg-white/5 hover:text-white'
                               }`}
                             >
@@ -829,7 +827,7 @@ export const AdminControlConsole: React.FC = () => {
                 <div className="bg-[#090E18] border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
                   {loading ? (
                     <div className="py-20 text-center text-slate-400 flex flex-col items-center justify-center gap-2">
-                      <Loader2 className="animate-spin text-[#F8C62B]" size={24} />
+                      <Loader2 className="animate-spin text-[#159447]" size={24} />
                       <span className="text-xs">Cargando grupos registrados...</span>
                     </div>
                   ) : filteredTrips.length === 0 ? (
@@ -841,7 +839,7 @@ export const AdminControlConsole: React.FC = () => {
                       <button
                         type="button"
                         onClick={openCreateModal}
-                        className="bg-[#F8C62B] text-black text-xs font-black uppercase px-4 py-2 rounded-xl"
+                        className="bg-[#159447] text-white text-xs font-black uppercase px-4 py-2 rounded-xl shadow-md shadow-[#159447]/30"
                       >
                         + REGISTRAR PRIMER COLEGIO
                       </button>
@@ -871,12 +869,12 @@ export const AdminControlConsole: React.FC = () => {
                                 {/* CÓDIGO DE GRUPO */}
                                 <td className="py-4 px-5 align-middle">
                                   <div className="flex flex-col">
-                                    <div className="inline-flex items-center gap-1.5 w-fit bg-[#F8C62B]/10 border border-[#F8C62B]/40 text-[#F8C62B] px-3 py-1.5 rounded-xl font-outfit font-black text-sm tracking-wide">
+                                    <div className="inline-flex items-center gap-1.5 w-fit bg-[#159447]/10 border border-[#159447]/40 text-[#159447] px-3 py-1.5 rounded-xl font-outfit font-black text-sm tracking-wide">
                                       <span>{trip.code}</span>
                                       <button
                                         type="button"
                                         onClick={() => handleCopyCode(trip.code)}
-                                        className="p-1 hover:bg-[#F8C62B]/20 rounded-md transition-colors text-[#F8C62B]"
+                                        className="p-1 hover:bg-[#159447]/20 rounded-md transition-colors text-[#159447]"
                                         title="Copiar código"
                                       >
                                         {isCopied ? <Check size={12} className="text-emerald-400" /> : <Copy size={12} />}
@@ -909,7 +907,7 @@ export const AdminControlConsole: React.FC = () => {
                                 {/* DESTINO */}
                                 <td className="py-4 px-5 align-middle whitespace-nowrap">
                                   <div className="flex items-center gap-1.5 font-bold text-white uppercase text-xs">
-                                    <MapPin size={14} className="text-[#F8C62B]" />
+                                    <MapPin size={14} className="text-[#159447]" />
                                     <span>{trip.destination || 'Camboriú'}</span>
                                   </div>
                                 </td>
@@ -929,7 +927,7 @@ export const AdminControlConsole: React.FC = () => {
                                     <button
                                       type="button"
                                       onClick={() => handleOpenGallery(trip)}
-                                      className="bg-[#121826] hover:bg-[#F8C62B] text-slate-200 hover:text-black border border-white/10 hover:border-[#F8C62B] text-xs font-outfit font-black uppercase tracking-wider px-3.5 py-1.5 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer shadow-sm"
+                                      className="bg-[#121826] hover:bg-[#159447] text-slate-200 hover:text-white border border-white/10 hover:border-[#159447] text-xs font-outfit font-black uppercase tracking-wider px-3.5 py-1.5 rounded-xl transition-all flex items-center gap-1.5 cursor-pointer shadow-sm shadow-[#159447]/10"
                                     >
                                       <ImageIcon size={13} />
                                       <span>GALERÍA</span>
@@ -995,7 +993,7 @@ export const AdminControlConsole: React.FC = () => {
                                 onClick={() => setCurrentPage(p)}
                                 className={`w-8 h-8 rounded-lg font-bold transition-colors ${
                                   currentPage === p
-                                    ? 'bg-[#F8C62B] text-black shadow-md'
+                                    ? 'bg-[#159447] text-white shadow-md shadow-[#159447]/40'
                                     : 'hover:bg-white/5 text-slate-300'
                                 }`}
                               >
@@ -1028,7 +1026,7 @@ export const AdminControlConsole: React.FC = () => {
       </main>
 
       {/* ============================================================ */}
-      {/* 4. MODAL: REGISTRAR / EDITAR GRUPO (Specification 11) */}
+      {/* 4. MODAL: REGISTRAR / EDITAR GRUPO (Verde Samba Brasil #159447) */}
       {/* ============================================================ */}
       {groupModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
@@ -1043,7 +1041,7 @@ export const AdminControlConsole: React.FC = () => {
             </button>
 
             <div className="mb-6">
-              <span className="text-[10px] font-bold uppercase tracking-wider text-[#F8C62B] block mb-1">
+              <span className="text-[10px] font-bold uppercase tracking-wider text-[#159447] block mb-1">
                 {editingTripId ? 'MODIFICACIÓN DE DATOS' : 'NUEVO REGISTRO'}
               </span>
               <h3 className="font-outfit font-black text-2xl text-white uppercase">
@@ -1063,7 +1061,7 @@ export const AdminControlConsole: React.FC = () => {
                   value={groupCode}
                   onChange={(e) => setGroupCode(e.target.value.toUpperCase())}
                   placeholder="Ej: SB-101 o B313"
-                  className="w-full bg-[#121826] border border-white/10 rounded-xl px-4 py-2.5 text-white font-mono text-sm focus:outline-none focus:border-[#F8C62B] transition-colors"
+                  className="w-full bg-[#121826] border border-white/10 rounded-xl px-4 py-2.5 text-white font-mono text-sm focus:outline-none focus:border-[#159447] transition-colors"
                 />
               </div>
 
@@ -1076,7 +1074,7 @@ export const AdminControlConsole: React.FC = () => {
                   <button
                     type="button"
                     onClick={handleAddSchoolInput}
-                    className="text-[11px] font-bold text-[#F8C62B] hover:underline flex items-center gap-1 cursor-pointer"
+                    className="text-[11px] font-bold text-[#159447] hover:underline flex items-center gap-1 cursor-pointer"
                   >
                     <Plus size={12} />
                     <span>Agregar colegio</span>
@@ -1092,7 +1090,7 @@ export const AdminControlConsole: React.FC = () => {
                         value={val}
                         onChange={(e) => handleSchoolInputChange(idx, e.target.value)}
                         placeholder={`Nombre del colegio #${idx + 1}`}
-                        className="w-full bg-[#121826] border border-white/10 rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-[#F8C62B] transition-colors"
+                        className="w-full bg-[#121826] border border-white/10 rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-[#159447] transition-colors"
                       />
                       {schoolInputs.length > 1 && (
                         <button
@@ -1120,7 +1118,7 @@ export const AdminControlConsole: React.FC = () => {
                   value={groupDestination}
                   onChange={(e) => setGroupDestination(e.target.value)}
                   placeholder="Camboriú"
-                  className="w-full bg-[#121826] border border-white/10 rounded-xl px-4 py-2.5 text-white text-xs focus:outline-none focus:border-[#F8C62B] transition-colors"
+                  className="w-full bg-[#121826] border border-white/10 rounded-xl px-4 py-2.5 text-white text-xs focus:outline-none focus:border-[#159447] transition-colors"
                 />
                 <span className="text-[10px] text-slate-500 mt-1 block">
                   Por defecto es Camboriú, abierto a nuevos destinos futuros.
@@ -1137,14 +1135,14 @@ export const AdminControlConsole: React.FC = () => {
                   required
                   value={groupDate}
                   onChange={(e) => setGroupDate(e.target.value)}
-                  className="w-full bg-[#121826] border border-white/10 rounded-xl px-4 py-2.5 text-white text-xs focus:outline-none focus:border-[#F8C62B] transition-colors"
+                  className="w-full bg-[#121826] border border-white/10 rounded-xl px-4 py-2.5 text-white text-xs focus:outline-none focus:border-[#159447] transition-colors"
                 />
                 <span className="text-[10px] text-slate-500 mt-1 block">
                   Esta fecha se representará en el calendario público para que los alumnos ubiquen su viaje.
                 </span>
               </div>
 
-              {/* ACTION BUTTONS */}
+              {/* ACTION BUTTONS (VERDE SAMBA BRASIL) */}
               <div className="flex items-center justify-end gap-3 pt-3 border-t border-white/10">
                 <button
                   type="button"
@@ -1157,7 +1155,7 @@ export const AdminControlConsole: React.FC = () => {
                 <button
                   type="submit"
                   disabled={savingGroup}
-                  className="bg-[#F8C62B] hover:bg-[#e6b522] text-black font-outfit font-black text-xs uppercase tracking-wider px-6 py-2.5 rounded-xl shadow-[0_0_15px_rgba(248,198,43,0.3)] flex items-center gap-2 cursor-pointer disabled:opacity-50"
+                  className="bg-[#159447] hover:bg-[#117739] text-white font-outfit font-black text-xs uppercase tracking-wider px-6 py-2.5 rounded-xl shadow-[0_0_20px_rgba(21,148,71,0.35)] flex items-center gap-2 cursor-pointer disabled:opacity-50 transition-all"
                 >
                   {savingGroup && <Loader2 size={13} className="animate-spin" />}
                   <span>{editingTripId ? 'GUARDAR CAMBIOS' : 'REGISTRAR GRUPO'}</span>
@@ -1169,7 +1167,7 @@ export const AdminControlConsole: React.FC = () => {
       )}
 
       {/* ============================================================ */}
-      {/* 5. MODAL: DOBLE CONFIRMACIÓN DE ELIMINACIÓN (Exact match Image 2) */}
+      {/* 5. MODAL: DOBLE CONFIRMACIÓN DE ELIMINACIÓN */}
       {/* ============================================================ */}
       {deleteModalOpen && tripToDelete && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md animate-fadeIn">
