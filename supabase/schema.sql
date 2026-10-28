@@ -238,3 +238,80 @@ CREATE POLICY "Only admin can delete photos"
   ON public.photos FOR DELETE
   TO authenticated
   USING (public.is_admin());
+
+-- 14. APP SETTINGS (Webhook n8n, DreamsCDA toggle, Tracking Scripts, AnyChat)
+CREATE TABLE IF NOT EXISTS public.app_settings (
+  id text PRIMARY KEY,
+  value jsonb NOT NULL,
+  updated_at timestamptz DEFAULT now()
+);
+
+ALTER TABLE public.app_settings ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Public can view settings" ON public.app_settings;
+CREATE POLICY "Public can view settings"
+  ON public.app_settings FOR SELECT
+  TO authenticated, anon
+  USING (true);
+
+DROP POLICY IF EXISTS "Only admin can update settings" ON public.app_settings;
+CREATE POLICY "Only admin can update settings"
+  ON public.app_settings FOR ALL
+  TO authenticated
+  USING (public.is_admin())
+  WITH CHECK (public.is_admin());
+
+-- 15. SURVEYS TABLE
+CREATE TABLE IF NOT EXISTS public.surveys (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  title text NOT NULL,
+  description text,
+  questions jsonb NOT NULL DEFAULT '[]'::jsonb,
+  is_active boolean DEFAULT true,
+  created_at timestamptz DEFAULT now(),
+  updated_at timestamptz DEFAULT now()
+);
+
+ALTER TABLE public.surveys ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Public can view active surveys or admin views all" ON public.surveys;
+CREATE POLICY "Public can view active surveys or admin views all"
+  ON public.surveys FOR SELECT
+  TO authenticated, anon
+  USING (is_active = true OR public.is_admin());
+
+DROP POLICY IF EXISTS "Only admin can manage surveys" ON public.surveys;
+CREATE POLICY "Only admin can manage surveys"
+  ON public.surveys FOR ALL
+  TO authenticated
+  USING (public.is_admin())
+  WITH CHECK (public.is_admin());
+
+-- 16. SURVEY RESPONSES (PASSENGER LEADS) TABLE
+CREATE TABLE IF NOT EXISTS public.survey_responses (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  survey_id uuid REFERENCES public.surveys(id) ON DELETE CASCADE,
+  survey_title text,
+  lead_name text NOT NULL,
+  lead_email text NOT NULL,
+  lead_phone text,
+  group_code text,
+  school_name text,
+  answers jsonb NOT NULL DEFAULT '[]'::jsonb,
+  created_at timestamptz DEFAULT now()
+);
+
+ALTER TABLE public.survey_responses ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Public can insert survey responses" ON public.survey_responses;
+CREATE POLICY "Public can insert survey responses"
+  ON public.survey_responses FOR INSERT
+  TO authenticated, anon
+  WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Only admin can view or delete responses" ON public.survey_responses;
+CREATE POLICY "Only admin can view or delete responses"
+  ON public.survey_responses FOR ALL
+  TO authenticated
+  USING (public.is_admin())
+  WITH CHECK (public.is_admin());

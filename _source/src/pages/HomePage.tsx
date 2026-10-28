@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Calendar,
   Camera,
@@ -16,8 +16,22 @@ import {
   Award,
 } from 'lucide-react';
 import { TripCalendarSearch } from '../components/search/TripCalendarSearch';
+import { surveyService } from '../services/surveyService';
 
 export const HomePage: React.FC = () => {
+  const [dreamscdaEnabled, setDreamscdaEnabled] = useState(true);
+
+  useEffect(() => {
+    async function loadSettings() {
+      try {
+        const settings = await surveyService.getSettings();
+        setDreamscdaEnabled(settings?.dreamscda_banner?.enabled ?? true);
+      } catch (e) {
+        console.warn('Could not load dreamscda settings:', e);
+      }
+    }
+    loadSettings();
+  }, []);
   return (
     <div className="min-h-screen bg-[#070D18] text-slate-100 flex flex-col selection:bg-[#159447] selection:text-white">
       
@@ -230,34 +244,36 @@ export const HomePage: React.FC = () => {
         </div>
       </section>
 
-      {/* 5. DREAMSCDA PROMO BANNER */}
-      <section className="py-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-gradient-to-r from-[#0C1524] via-[#102038] to-[#0A1628] border border-[#F8C62B]/30 rounded-3xl p-8 sm:p-12 relative overflow-hidden shadow-2xl">
-          <div className="max-w-2xl relative z-10">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#F8C62B]/20 text-[#F8C62B] text-xs font-bold uppercase tracking-wider mb-4 border border-[#F8C62B]/30">
-              <Sparkles size={14} /> Catálogo Oficial DreamsCDA
-            </div>
-            
-            <h2 className="font-outfit font-black text-2xl sm:text-4xl text-white mb-4 leading-tight">
-              ¿Querés descubrir más recuerdos de tu viaje?
-            </h2>
-            
-            <p className="text-slate-300 text-xs sm:text-base leading-relaxed mb-8">
-              Encontrá las fotos profesionales panorámicas, fotos de fiesta y packs de recuerdos en alta definición disponibles en la tienda de DreamsCDA.
-            </p>
+      {/* 5. DREAMSCDA PROMO BANNER (Controlled by Admin Switch) */}
+      {dreamscdaEnabled && (
+        <section className="py-12 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-gradient-to-r from-[#0C1524] via-[#102038] to-[#0A1628] border border-[#F8C62B]/30 rounded-3xl p-8 sm:p-12 relative overflow-hidden shadow-2xl">
+            <div className="max-w-2xl relative z-10">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#F8C62B]/20 text-[#F8C62B] text-xs font-bold uppercase tracking-wider mb-4 border border-[#F8C62B]/30">
+                <Sparkles size={14} /> Catálogo Oficial DreamsCDA
+              </div>
+              
+              <h2 className="font-outfit font-black text-2xl sm:text-4xl text-white mb-4 leading-tight">
+                ¿Querés descubrir más recuerdos de tu viaje?
+              </h2>
+              
+              <p className="text-slate-300 text-xs sm:text-base leading-relaxed mb-8">
+                Encontrá las fotos profesionales panorámicas, fotos de fiesta y packs de recuerdos en alta definición disponibles en la tienda de DreamsCDA.
+              </p>
 
-            <a
-              href="https://fotos.dreamscda.com.ar"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2.5 bg-[#F8C62B] hover:bg-[#e4b21e] text-black font-outfit font-black text-xs sm:text-sm uppercase tracking-wider px-8 py-4 rounded-xl shadow-lg shadow-[#F8C62B]/25 transform hover:-translate-y-0.5 transition-all cursor-pointer"
-            >
-              <span>VER FOTOS PROFESIONALES</span>
-              <ExternalLink size={18} />
-            </a>
+              <a
+                href="https://fotos.dreamscda.com.ar"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2.5 bg-[#F8C62B] hover:bg-[#e4b21e] text-black font-outfit font-black text-xs sm:text-sm uppercase tracking-wider px-8 py-4 rounded-xl shadow-lg shadow-[#F8C62B]/25 transform hover:-translate-y-0.5 transition-all cursor-pointer"
+              >
+                <span>VER FOTOS PROFESIONALES</span>
+                <ExternalLink size={18} />
+              </a>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Anchor for footer contact scroll */}
       <div id="contacto" />

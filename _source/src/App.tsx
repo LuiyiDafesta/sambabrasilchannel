@@ -9,10 +9,12 @@ import { SearchPage } from './pages/SearchPage';
 import { GalleryPage } from './pages/GalleryPage';
 import { AdminLogin } from './pages/admin/AdminLogin';
 import { AdminControlConsole } from './pages/admin/AdminControlConsole';
+import { DynamicScripts } from './components/common/DynamicScripts';
 
 function PublicLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex flex-col min-h-screen">
+      <DynamicScripts />
       <Navbar />
       <main className="flex-1">{children}</main>
       <Footer />

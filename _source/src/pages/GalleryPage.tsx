@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom';
 import {
   Download,
   Plane,
@@ -16,12 +16,16 @@ import {
   Sparkles,
   Camera,
   Check,
+  MessageSquare,
 } from 'lucide-react';
 import { tripService } from '../services/tripService';
+import { surveyService, Survey, AppSettings } from '../services/surveyService';
+import { PassengerSurveyModal } from '../components/survey/PassengerSurveyModal';
 import { Vuelta, Fotografia } from '../types';
 
 export const GalleryPage: React.FC = () => {
   const { code } = useParams<{ code: string }>();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
 
   const [trip, setTrip] = useState<Vuelta | null>(null);
@@ -30,16 +34,42 @@ export const GalleryPage: React.FC = () => {
   const [activeLightboxPhoto, setActiveLightboxPhoto] = useState<Fotografia | null>(null);
   const [downloadSuccess, setDownloadSuccess] = useState(false);
 
+  // Survey & Settings state
+  const [activeSurvey, setActiveSurvey] = useState<Survey | null>(null);
+  const [surveyOpen, setSurveyOpen] = useState(false);
+  const [dreamscdaEnabled, setDreamscdaEnabled] = useState(true);
+
   useEffect(() => {
-    async function fetchTrip() {
+    async function fetchTripAndSettings() {
       if (!code) return;
       setLoading(true);
-      const data = await tripService.getTripById(code);
-      setTrip(data);
-      setLoading(false);
+      try {
+        const [tripData, activeSurveys, appSettings] = await Promise.all([
+          tripService.getTripById(code),
+          surveyService.getActiveSurveys(),
+          surveyService.getSettings(),
+        ]);
+
+        setTrip(tripData);
+        setDreamscdaEnabled(appSettings?.dreamscda_banner?.enabled ?? true);
+
+        // Check active surveys or specific encuesta from URL
+        const encuestaParam = searchParams.get('encuesta');
+        if (encuestaParam) {
+          const specific = await surveyService.getSurveyById(encuestaParam);
+          if (specific) {
+            setActiveSurvey(specific);
+            setSurveyOpen(true);
+          }
+        } else if (activeSurveys.length > 0) {
+          setActiveSurvey(activeSurveys[0]);
+        }
+      } finally {
+        setLoading(false);
+      }
     }
-    fetchTrip();
-  }, [code]);
+    fetchTripAndSettings();
+  }, [code, searchParams]);
 
   if (loading) {
     return (
@@ -258,31 +288,73 @@ export const GalleryPage: React.FC = () => {
           </div>
         )}
 
-        {/* DREAMSCDA PROMOTIONAL BLOCK */}
-        <div className="bg-gradient-to-r from-[#0C1524] to-[#12213A] border border-[#F8C62B]/30 rounded-3xl p-8 sm:p-10 text-center relative overflow-hidden shadow-2xl">
-          <div className="max-w-2xl mx-auto">
-            <span className="text-[11px] font-bold uppercase tracking-widest text-[#F8C62B] bg-[#F8C62B]/15 px-3 py-1 rounded-full border border-[#F8C62B]/30">
-              Fotos Profesionales HD
-            </span>
-            <h2 className="font-outfit font-black text-2xl sm:text-3xl text-white mt-3 mb-2">
-              ¿Querés descubrir más recuerdos de tu viaje?
-            </h2>
-            <p className="text-slate-300 text-xs sm:text-sm mb-6 leading-relaxed">
-              Encontrá las fotos profesionales, retratos individuales y panorámicas exclusivas en DreamsCDA.
-            </p>
-            <a
-              href="https://fotos.dreamscda.com.ar"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 bg-[#F8C62B] hover:bg-[#e4b21e] text-black font-outfit font-black text-xs sm:text-sm uppercase tracking-wider px-8 py-3.5 rounded-xl shadow-lg shadow-[#F8C62B]/20 transition-all cursor-pointer"
+        {/* PASSENGER SATISFACTION SURVEY BANNER (Only shown if an active survey exists) */}
+        {activeSurvey && (
+          <div className="bg-[#0C1524] border border-[#159447]/50 rounded-3xl p-6 sm:p-8 mb-10 flex flex-col md:flex-row items-center justify-between gap-6 shadow-[0_0_30px_rgba(21,148,71,0.15)] relative overflow-hidden group">
+            <div className="flex items-center gap-4 relative z-10">
+              <div className="w-14 h-14 rounded-2xl bg-[#159447]/20 border border-[#159447]/40 text-[#159447] flex items-center justify-center shrink-0 shadow-[0_0_20px_rgba(21,148,71,0.3)]">
+                <Sparkles size={28} />
+              </div>
+              <div>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-[#159447] block mb-0.5">
+                  ENCUESTA DE SATISFACCIÓN DE PASAJEROS
+                </span>
+                <h3 className="font-outfit font-black text-xl sm:text-2xl text-white uppercase">
+                  {activeSurvey.title}
+                </h3>
+                <p className="text-xs text-slate-300 mt-1 max-w-xl leading-relaxed">
+                  {activeSurvey.description || 'Contanos cómo fue tu experiencia de viaje con Samba Brasil Channel y ayudanos a seguir mejorando.'}
+                </p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => setSurveyOpen(true)}
+              className="w-full md:w-auto bg-[#159447] hover:bg-[#117739] text-white font-outfit font-black text-xs sm:text-sm uppercase tracking-wider px-8 py-3.5 rounded-xl shadow-[0_0_20px_rgba(21,148,71,0.35)] hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer whitespace-nowrap relative z-10 shrink-0"
             >
-              <span>VER FOTOS PROFESIONALES</span>
-              <ExternalLink size={16} />
-            </a>
+              RESPONDER ENCUESTA
+            </button>
           </div>
-        </div>
+        )}
+
+        {/* DREAMSCDA PROMOTIONAL BLOCK (Controlled by Admin switch) */}
+        {dreamscdaEnabled && (
+          <div className="bg-gradient-to-r from-[#0C1524] to-[#12213A] border border-[#F8C62B]/30 rounded-3xl p-8 sm:p-10 text-center relative overflow-hidden shadow-2xl">
+            <div className="max-w-2xl mx-auto">
+              <span className="text-[11px] font-bold uppercase tracking-widest text-[#F8C62B] bg-[#F8C62B]/15 px-3 py-1 rounded-full border border-[#F8C62B]/30">
+                Fotos Profesionales HD
+              </span>
+              <h2 className="font-outfit font-black text-2xl sm:text-3xl text-white mt-3 mb-2">
+                ¿Querés descubrir más recuerdos de tu viaje?
+              </h2>
+              <p className="text-slate-300 text-xs sm:text-sm mb-6 leading-relaxed">
+                Encontrá las fotos profesionales, retratos individuales y panorámicas exclusivas en DreamsCDA.
+              </p>
+              <a
+                href="https://fotos.dreamscda.com.ar"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 bg-[#F8C62B] hover:bg-[#e4b21e] text-black font-outfit font-black text-xs sm:text-sm uppercase tracking-wider px-8 py-3.5 rounded-xl shadow-lg shadow-[#F8C62B]/20 transition-all cursor-pointer"
+              >
+                <span>VER FOTOS PROFESIONALES</span>
+                <ExternalLink size={16} />
+              </a>
+            </div>
+          </div>
+        )}
 
       </div>
+
+      {/* PASSENGER SURVEY MODAL */}
+      {activeSurvey && (
+        <PassengerSurveyModal
+          survey={activeSurvey}
+          groupCode={trip.code}
+          isOpen={surveyOpen}
+          onClose={() => setSurveyOpen(false)}
+        />
+      )}
 
       {/* LIGHTBOX MODAL */}
       {activeLightboxPhoto && (

@@ -32,6 +32,7 @@ import { tripService } from '../../services/tripService';
 import { uploadImage } from '../../lib/storage';
 import { useAuth } from '../../context/AuthContext';
 import { Vuelta, Fotografia } from '../../types';
+import { AdminSurveyTab } from '../../components/admin/AdminSurveyTab';
 
 interface UploadQueueItem {
   id: string;
@@ -454,23 +455,8 @@ export const AdminControlConsole: React.FC = () => {
       {/* 3. BODY VIEW: (GALLERY VIEW or TABLE VIEW or OTHER TABS) */}
       {/* ============================================================ */}
       <main className="flex-1 px-4 sm:px-8 py-6 max-w-7xl mx-auto w-full">
-        {/* VIEW: ENCUESTAS PLACEHOLDER */}
-        {activeTab === 'encuestas' && (
-          <div className="bg-[#0C1424] border border-white/10 rounded-3xl p-12 text-center max-w-xl mx-auto my-8">
-            <div className="w-16 h-16 rounded-2xl bg-[#159447]/10 border border-[#159447]/30 text-[#159447] flex items-center justify-center mx-auto mb-4">
-              <Sparkles size={28} />
-            </div>
-            <h3 className="font-outfit font-black text-xl text-white uppercase tracking-wider mb-2">
-              Sistema de Encuestas
-            </h3>
-            <p className="text-slate-400 text-xs sm:text-sm leading-relaxed mb-6">
-              Módulo preparado para encuestas de satisfacción, votación de fiestas temáticas y feedback de egresados de Samba Brasil.
-            </p>
-            <span className="inline-flex px-3 py-1 rounded-full bg-[#159447]/15 border border-[#159447]/40 text-[#159447] text-xs font-bold uppercase">
-              Próximamente disponible
-            </span>
-          </div>
-        )}
+        {/* VIEW: SISTEMA DE ENCUESTAS & LEADS CRM */}
+        {activeTab === 'encuestas' && <AdminSurveyTab />}
 
         {/* VIEW: ESTADISTICAS PLACEHOLDER */}
         {activeTab === 'estadisticas' && (
