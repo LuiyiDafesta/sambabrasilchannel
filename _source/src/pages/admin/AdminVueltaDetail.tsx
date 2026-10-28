@@ -118,6 +118,13 @@ export const AdminVueltaDetail: React.FC = () => {
     }
   };
 
+  const handleDeletePhoto = async (photoId: string) => {
+    if (!confirm('¿Seguro que deseas eliminar esta fotografía del álbum?')) return;
+    await tripService.deletePhoto(photoId);
+    loadTrip();
+  };
+
+
   if (loading) {
     return (
       <div className="py-20 text-center">
@@ -243,7 +250,7 @@ export const AdminVueltaDetail: React.FC = () => {
             </div>
             <div>
               <span className="text-slate-400 block mb-1">Detalle de Transporte:</span>
-              <span className="text-slate-300">{trip.transport_details || 'Charter Oficial'}</span>
+              <span className="text-slate-300">{trip.transport_details || 'Vuelo Privado Oficial'}</span>
             </div>
             <div>
               <span className="text-slate-400 block mb-1">Coordinador Principal:</span>
@@ -390,7 +397,17 @@ export const AdminVueltaDetail: React.FC = () => {
                   <div key={p.id} className="aspect-square rounded-xl overflow-hidden bg-black/40 border border-white/10 relative group">
                     <img src={p.url} alt={p.filename} className="w-full h-full object-cover" />
                     <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity p-2 flex flex-col justify-between text-[10px] text-white">
-                      <span className="truncate">{p.filename}</span>
+                      <div className="flex items-center justify-between gap-1">
+                        <span className="truncate max-w-[80%]">{p.filename}</span>
+                        <button
+                          type="button"
+                          onClick={() => handleDeletePhoto(p.id)}
+                          className="p-1 rounded-md bg-rose-500/20 text-rose-400 hover:bg-rose-500 hover:text-white transition-colors"
+                          title="Eliminar foto del álbum"
+                        >
+                          <Trash2 size={13} />
+                        </button>
+                      </div>
                       <span className="text-[#159447] font-bold uppercase">{p.category}</span>
                     </div>
                   </div>

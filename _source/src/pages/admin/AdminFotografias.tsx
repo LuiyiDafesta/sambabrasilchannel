@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Camera, UploadCloud, Search, ExternalLink, Filter } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Camera, ExternalLink, Trash2 } from 'lucide-react';
 import { tripService } from '../../services/tripService';
 import { Vuelta, Fotografia } from '../../types';
 
@@ -8,9 +7,19 @@ export const AdminFotografias: React.FC = () => {
   const [trips, setTrips] = useState<Vuelta[]>([]);
   const [selectedVuelta, setSelectedVuelta] = useState<string>('all');
 
-  useEffect(() => {
+  const loadAll = () => {
     tripService.getAllTrips().then(setTrips);
+  };
+
+  useEffect(() => {
+    loadAll();
   }, []);
+
+  const handleDeletePhoto = async (photoId: string) => {
+    if (!confirm('¿Seguro que deseas eliminar esta fotografía del repositorio?')) return;
+    await tripService.deletePhoto(photoId);
+    loadAll();
+  };
 
   const allPhotos: (Fotografia & { vuelta_code: string })[] = [];
   trips.forEach((t) => {
@@ -32,14 +41,14 @@ export const AdminFotografias: React.FC = () => {
             Repositorio de Fotografías
           </h1>
           <p className="text-xs text-slate-400 mt-1">
-            Archivos alojados en Backblaze B2 y distribuidos por Cloudflare CDN.
+            Gestión centralizada de imágenes para administradores autorizados.
           </p>
         </div>
 
         <select
           value={selectedVuelta}
           onChange={(e) => setSelectedVuelta(e.target.value)}
-          className="bg-[#121D32] border border-white/10 rounded-xl px-4 py-2 text-xs text-white focus:outline-none"
+          className="bg-[#121D32] border border-white/10 rounded-xl px-4 py-2 text-xs text-white focus:outline-none focus:border-[#159447]"
         >
           <option value="all">Todas las vueltas</option>
           {trips.map((t) => (
@@ -60,8 +69,18 @@ export const AdminFotografias: React.FC = () => {
           {filtered.map((p) => (
             <div key={p.id} className="aspect-square rounded-2xl overflow-hidden bg-black border border-white/10 relative group">
               <img src={p.url} alt={p.filename} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity p-2.5 flex flex-col justify-between text-[10px]">
-                <span className="text-slate-300 font-mono truncate">{p.filename}</span>
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity p-2.5 flex flex-col justify-between text-[10px]">
+                <div className="flex items-center justify-between gap-1">
+                  <span className="text-slate-300 font-mono truncate">{p.filename}</span>
+                  <button
+                    type="button"
+                    onClick={() => handleDeletePhoto(p.id)}
+                    className="p-1 rounded-md bg-rose-500/20 text-rose-400 hover:bg-rose-500 hover:text-white transition-colors"
+                    title="Eliminar foto"
+                  >
+                    <Trash2 size={12} />
+                  </button>
+                </div>
                 <div className="flex items-center justify-between">
                   <span className="bg-[#124DA0] text-white px-1.5 py-0.5 rounded font-bold">{p.vuelta_code}</span>
                   <a href={p.url} target="_blank" rel="noopener noreferrer" className="text-white hover:text-[#159447]">

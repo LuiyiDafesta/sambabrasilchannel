@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Calendar as CalendarIcon,
@@ -10,8 +10,9 @@ import {
   Search,
   MapPin,
   ChevronRight,
+  Loader2,
 } from 'lucide-react';
-import { MOCK_TRIPS } from '../../data/mockTrips';
+import { tripService } from '../../services/tripService';
 import { Vuelta } from '../../types';
 
 interface TripCalendarSearchProps {
@@ -36,6 +37,8 @@ export const TripCalendarSearch: React.FC<TripCalendarSearchProps> = ({
     { key: '2027-01', label: 'Enero 2027', shortLabel: 'Ene 2027', year: 2027, month: 1, daysCount: 31, startDayOfWeek: 5 }, // 1 Ene 2027 is Viernes (5)
   ] as const;
 
+  const [allTrips, setAllTrips] = useState<Vuelta[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedMonthKey, setSelectedMonthKey] = useState<string>(initialMonth);
   // Default selected date if within current month, or the first trip of that month
   const [selectedDay, setSelectedDay] = useState<number | null>(() => {
@@ -49,10 +52,23 @@ export const TripCalendarSearch: React.FC<TripCalendarSearchProps> = ({
   // School name filter
   const [schoolFilter, setSchoolFilter] = useState('');
 
+  useEffect(() => {
+    let isMounted = true;
+    tripService.getAllTrips().then((data) => {
+      if (isMounted) {
+        setAllTrips(data);
+        setLoading(false);
+      }
+    });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   const currentMonthData = availableMonths.find((m) => m.key === selectedMonthKey) || availableMonths[0];
 
-  // Map trips loaded for this month
-  const tripsThisMonth = MOCK_TRIPS.filter((t) => t.date.startsWith(selectedMonthKey));
+  // Map trips loaded for this month from real database trips
+  const tripsThisMonth = allTrips.filter((t) => t.date.startsWith(selectedMonthKey));
 
   // Find trips for selected day
   const formattedSelectedDate = selectedDay
@@ -63,7 +79,7 @@ export const TripCalendarSearch: React.FC<TripCalendarSearchProps> = ({
 
   // Trips matching school search filter
   const schoolFilteredTrips = schoolFilter.trim()
-    ? MOCK_TRIPS.filter((t) =>
+    ? allTrips.filter((t) =>
         t.schools.some((s) => s.name.toLowerCase().includes(schoolFilter.toLowerCase()))
       )
     : [];
@@ -79,7 +95,7 @@ export const TripCalendarSearch: React.FC<TripCalendarSearchProps> = ({
   const handleMonthChange = (monthKey: string) => {
     setSelectedMonthKey(monthKey);
     // Find first trip of this month
-    const firstTrip = MOCK_TRIPS.find((t) => t.date.startsWith(monthKey));
+    const firstTrip = allTrips.find((t) => t.date.startsWith(monthKey));
     if (firstTrip) {
       const dayNum = parseInt(firstTrip.date.split('-')[2], 10);
       setSelectedDay(dayNum);
@@ -106,7 +122,7 @@ export const TripCalendarSearch: React.FC<TripCalendarSearchProps> = ({
             <h3 className="font-outfit font-black text-lg text-white flex items-center gap-2">
               Camboriú, Brasil
               <span className="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-[#124DA0]/40 text-sky-300 border border-[#124DA0]">
-                Vuelos Charter
+                Vuelos Privados
               </span>
             </h3>
           </div>

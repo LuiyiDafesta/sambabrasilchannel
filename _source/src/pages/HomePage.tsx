@@ -16,7 +16,6 @@ import {
   Award,
 } from 'lucide-react';
 import { TripCalendarSearch } from '../components/search/TripCalendarSearch';
-import { MOCK_TRIPS } from '../data/mockTrips';
 
 export const HomePage: React.FC = () => {
   return (
@@ -48,7 +47,7 @@ export const HomePage: React.FC = () => {
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-black/50 border border-[#F8C62B]/40 backdrop-blur-md text-xs sm:text-sm text-[#F8C62B] mb-6 shadow-[0_0_20px_rgba(248,198,43,0.2)] animate-fadeIn">
             <Sparkles size={16} className="text-[#F8C62B]" />
             <span className="font-bold tracking-wide">
-              Exclusivo Camboriú &bull; Vuelos Charter Oficiales
+              Exclusivo Camboriú &bull; Vuelos Privados Oficiales
             </span>
           </div>
 
@@ -142,7 +141,7 @@ export const HomePage: React.FC = () => {
                 La experiencia audiovisual más emocionante de tu viaje.
               </h2>
               <p className="text-slate-300 text-sm sm:text-base leading-relaxed mb-6">
-                <strong>Samba Brasil Channel</strong> es la plataforma oficial de fotografía y contenido digital de los viajes de egresados a <strong>Camboriú</strong>. Operamos en exclusiva con vuelos charter para que cada grupo llegue directo a la magia del carnaval, las playas de Santa Catarina y las mejores fiestas.
+                <strong>Samba Brasil Channel</strong> es la plataforma oficial de fotografía y contenido digital de los viajes de egresados a <strong>Camboriú</strong>. Operamos en exclusiva con vuelos privados para que cada grupo llegue directo a la magia del carnaval, las playas de Santa Catarina y las mejores fiestas.
               </p>
               <p className="text-slate-400 text-xs sm:text-sm leading-relaxed mb-8">
                 Las fotografías se organizan por contingente de vuelo: <strong>todos los colegios que compartieron ese viaje acceden al mismo álbum completo</strong>, para que nadie se pierda ninguna anécdota, fiesta temática ni recuerdo grupal.
@@ -152,7 +151,7 @@ export const HomePage: React.FC = () => {
                 <div className="bg-black/30 border border-white/5 p-4 rounded-2xl">
                   <Plane size={20} className="text-[#F8C62B] mb-2" />
                   <h4 className="font-bold text-white text-xs sm:text-sm">Vuelos Exclusivos</h4>
-                  <p className="text-[11px] text-slate-400 mt-0.5">Operación charter directa a Brasil.</p>
+                  <p className="text-[11px] text-slate-400 mt-0.5">Operación de vuelos privados directa a Brasil.</p>
                 </div>
                 <div className="bg-black/30 border border-white/5 p-4 rounded-2xl">
                   <MapPin size={20} className="text-[#159447] mb-2" />

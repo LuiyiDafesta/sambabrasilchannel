@@ -123,6 +123,8 @@ export const Footer: React.FC = () => {
             <Link to="/terminos" className="hover:text-[#159447] transition-colors">Términos y Condiciones</Link>
             <span className="text-white/20 px-1">|</span>
             <Link to="/privacidad" className="hover:text-[#159447] transition-colors">Política de Privacidad</Link>
+            <span className="text-white/20 px-1">|</span>
+            <Link to="/admin" className="text-slate-400 hover:text-[#159447] transition-colors">Acceso Admin</Link>
           </div>
 
           {/* Social Icons */}
