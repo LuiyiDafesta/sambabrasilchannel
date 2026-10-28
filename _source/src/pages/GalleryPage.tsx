@@ -9,12 +9,31 @@ import {
   Sparkles,
   Camera,
   CheckCircle2,
+  ArrowLeft,
+  Share2,
+  MapPin,
+  Check,
 } from 'lucide-react';
 import { tripService } from '../services/tripService';
 import { surveyService, Survey } from '../services/surveyService';
 import { PassengerSurveyModal } from '../components/survey/PassengerSurveyModal';
 import { FlexibleGallery } from '../components/gallery/FlexibleGallery';
 import { Vuelta } from '../types';
+
+function formatTripDate(dateStr: string): string {
+  try {
+    const [y, m, d] = dateStr.split('-');
+    if (!m || !d) return dateStr;
+    const months = [
+      'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+      'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+    ];
+    const monthName = months[parseInt(m, 10) - 1];
+    return `${parseInt(d, 10)} de ${monthName}`;
+  } catch {
+    return dateStr;
+  }
+}
 
 export const GalleryPage: React.FC = () => {
   const { code } = useParams<{ code: string }>();
@@ -28,6 +47,9 @@ export const GalleryPage: React.FC = () => {
   const [activeSurvey, setActiveSurvey] = useState<Survey | null>(null);
   const [surveyOpen, setSurveyOpen] = useState(false);
   const [dreamscdaEnabled, setDreamscdaEnabled] = useState(true);
+
+  // Share feedback
+  const [shareToast, setShareToast] = useState(false);
 
   useEffect(() => {
     async function fetchTripAndSettings() {
@@ -94,84 +116,118 @@ export const GalleryPage: React.FC = () => {
       ? trip.schools.map((s) => s.name).join(', ')
       : trip.code;
 
+  const handleShare = async () => {
+    const shareData = {
+      title: `Fotos de Viaje - Samba Brasil Channel`,
+      text: `Mirá las fotos del viaje de egresados de ${schoolsText} en Samba Brasil Channel`,
+      url: window.location.href,
+    };
+
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+        return;
+      } catch (e) {
+        // Ignorar si el usuario cancela el diálogo nativo
+      }
+    }
+
+    // Copiar al portapapeles
+    navigator.clipboard.writeText(window.location.href);
+    setShareToast(true);
+    setTimeout(() => setShareToast(false), 3000);
+  };
+
   return (
     <div className="min-h-screen bg-[#070D18] text-slate-100 pt-28 pb-20 selection:bg-[#159447] selection:text-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
         
-        {/* Breadcrumb Navigation */}
-        <div className="flex items-center gap-2 text-xs text-slate-400">
-          <Link to="/" className="hover:text-white transition-colors">Inicio</Link>
-          <span>/</span>
-          <Link to={`/buscar?fecha=${trip.date}`} className="hover:text-white transition-colors">
-            {trip.date}
-          </Link>
-          <span>/</span>
-          <span className="text-[#159447] font-semibold">Viaje {trip.code}</span>
+        {/* ============================================================ */}
+        {/* 1. TOP NAV BAR: VOLVER & COMPARTIR (Imagen de referencia) */}
+        {/* ============================================================ */}
+        <div className="flex items-center justify-between gap-4 pt-2">
+          {/* Botón VOLVER */}
+          <button
+            type="button"
+            onClick={() => {
+              if (window.history.length > 1) {
+                navigate(-1);
+              } else {
+                navigate('/buscar');
+              }
+            }}
+            className="inline-flex items-center gap-2 text-slate-300 hover:text-white text-xs sm:text-sm font-outfit font-black uppercase tracking-wider transition-colors cursor-pointer group"
+          >
+            <ArrowLeft size={16} className="text-[#159447] group-hover:-translate-x-1 transition-transform" />
+            <span>VOLVER</span>
+          </button>
+
+          {/* Botón COMPARTIR */}
+          <button
+            type="button"
+            onClick={handleShare}
+            className="inline-flex items-center gap-2 bg-[#121826] hover:bg-[#159447]/20 border border-white/10 hover:border-[#159447] text-slate-200 hover:text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-outfit font-bold uppercase tracking-wider transition-all cursor-pointer shadow-md"
+            title="Compartir enlace de este viaje"
+          >
+            <Share2 size={15} className="text-[#159447]" />
+            <span>COMPARTIR</span>
+          </button>
         </div>
 
+        {/* Share toast feedback */}
+        {shareToast && (
+          <div className="fixed top-24 right-6 z-50 bg-[#159447] text-white text-xs font-bold px-4 py-2.5 rounded-xl shadow-2xl flex items-center gap-2 animate-slideIn">
+            <Check size={16} />
+            <span>¡Enlace del viaje copiado para compartir con tus amigos!</span>
+          </div>
+        )}
+
         {/* ============================================================ */}
-        {/* ALBUM HEADER SECTION */}
+        {/* 2. ALBUM HERO HEADER (Imagen de referencia) */}
         {/* ============================================================ */}
-        <div className="bg-[#0C1424] border border-white/10 rounded-3xl p-6 sm:p-8 shadow-2xl relative overflow-hidden">
-          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
-            
-            {/* Left: Transport Icon + Title + Coordinator */}
-            <div className="flex items-start gap-4">
-              <div className="w-16 h-16 rounded-2xl bg-[#159447]/20 border border-[#159447]/40 text-[#159447] flex items-center justify-center shrink-0">
-                <Plane size={32} className="text-[#159447]" />
-              </div>
-              <div>
-                <span className="text-[11px] font-bold uppercase tracking-wider text-[#159447] block">
-                  Vuelo Oficial a Camboriú, Brasil
+        <div className="space-y-4 pt-2">
+          {/* Badge: VIAJE DE EGRESADOS PREMIUM */}
+          <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#159447]/15 border border-[#159447]/35 text-[#159447] text-[11px] font-bold uppercase tracking-wider shadow-sm">
+            <Sparkles size={13} />
+            <span>VIAJE DE EGRESADOS PREMIUM</span>
+          </div>
+
+          {/* Gran Título con los Colegios del Grupo en Gigante */}
+          <h1 className="font-outfit font-black text-3xl sm:text-5xl lg:text-6xl text-white uppercase tracking-tight leading-[1.08]">
+            {schoolsText}
+          </h1>
+
+          {/* Etiquetas / Chips individuales de cada Colegio */}
+          <div className="flex flex-wrap items-center gap-2 pt-1">
+            {trip.schools && trip.schools.length > 0 ? (
+              trip.schools.map((sch) => (
+                <span
+                  key={sch.id}
+                  className="bg-[#121826] border border-white/10 text-slate-100 font-outfit font-bold text-xs uppercase px-3.5 py-1.5 rounded-full tracking-wide shadow-sm"
+                >
+                  {sch.name}
                 </span>
-                <h1 className="font-outfit font-black text-2xl sm:text-4xl text-white tracking-tight mt-0.5">
-                  Álbum &bull; Ingreso a Camboriú {trip.date}
-                </h1>
-                <div className="flex flex-wrap items-center gap-3 text-xs text-slate-400 mt-1">
-                  <span>Coordinación: <strong className="text-slate-200">{trip.coordinator_name || 'Staff Samba Brasil'}</strong></span>
-                  <span>&bull;</span>
-                  <span className="text-slate-400 font-mono">Código: <strong className="text-[#159447]">{trip.code}</strong></span>
-                </div>
-              </div>
-            </div>
-
-            {/* Center: Colegios List (Highlighted Box) */}
-            <div className="bg-[#121D32] border border-[#159447]/40 rounded-2xl p-4 w-full lg:w-auto min-w-[300px]">
-              <div className="flex items-center justify-between gap-2 mb-2">
-                <span className="text-[11px] font-bold text-[#159447] uppercase tracking-wider">
-                  Colegios de este grupo:
-                </span>
-                <span className="text-[10px] text-slate-400">Álbum compartido</span>
-              </div>
-              <ul className="space-y-1">
-                {trip.schools && trip.schools.length > 0 ? (
-                  trip.schools.map((sch) => (
-                    <li key={sch.id} className="text-xs text-slate-200 flex items-center justify-between gap-4 font-semibold">
-                      <span className="flex items-center gap-1.5">
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#159447]" />
-                        {sch.name}
-                      </span>
-                      {sch.pax_count ? (
-                        <span className="text-slate-400 text-[11px] font-mono">({sch.pax_count} pax)</span>
-                      ) : null}
-                    </li>
-                  ))
-                ) : (
-                  <li className="text-xs text-slate-300 font-bold uppercase">{trip.code}</li>
-                )}
-              </ul>
-            </div>
-
-            {/* Right: Quick shortcut badge */}
-            <div className="flex flex-col items-start lg:items-end w-full lg:w-auto shrink-0">
-              <span className="bg-[#159447]/15 border border-[#159447]/40 text-[#159447] text-xs font-bold uppercase px-4 py-2 rounded-xl">
-                {trip.photos?.length || 0} fotos HD disponibles
+              ))
+            ) : (
+              <span className="bg-[#121826] border border-white/10 text-white font-outfit font-bold text-xs uppercase px-3.5 py-1.5 rounded-full tracking-wide">
+                {trip.code}
               </span>
-              <span className="text-[11px] text-slate-400 mt-1.5 font-mono">
-                Descarga en ZIP o individuales
-              </span>
+            )}
+          </div>
+
+          {/* Fila de Metadatos: Destino & Fecha de Ingreso */}
+          <div className="flex flex-wrap items-center gap-3 pt-2 text-xs">
+            {/* Destino */}
+            <div className="inline-flex items-center gap-1.5 bg-[#121826]/90 border border-white/10 px-3.5 py-1.5 rounded-xl font-bold text-slate-200 shadow-sm">
+              <MapPin size={14} className="text-[#159447]" />
+              <span className="uppercase">{trip.destination || 'Camboriú'}</span>
             </div>
 
+            {/* Fecha de Ingreso Formateada */}
+            <div className="inline-flex items-center gap-1.5 bg-[#121826]/90 border border-white/10 px-3.5 py-1.5 rounded-xl font-bold text-slate-200 shadow-sm">
+              <Calendar size={14} className="text-[#159447]" />
+              <span>{formatTripDate(trip.date)}</span>
+            </div>
           </div>
         </div>
 
