@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { TripCalendarSearch } from '../components/search/TripCalendarSearch';
 import { surveyService } from '../services/surveyService';
+import carnavalImg from '../assets/carnaval-brasil.jpg';
 
 export const HomePage: React.FC = () => {
   const [dreamscdaEnabled, setDreamscdaEnabled] = useState(true);
@@ -177,11 +178,11 @@ export const HomePage: React.FC = () => {
             </div>
 
             <div className="relative">
-              <div className="aspect-[4/3] rounded-3xl overflow-hidden border border-white/10 shadow-2xl">
+              <div className="aspect-[4/3] rounded-3xl overflow-hidden border border-white/10 shadow-2xl group">
                 <img
-                  src="https://images.unsplash.com/photo-1519741497674-611481863552?auto=format&fit=crop&w=1200&q=85"
-                  alt="Samba Brasil Carnaval"
-                  className="w-full h-full object-cover"
+                  src={carnavalImg}
+                  alt="Carnaval do Brasil - Fiesta, baile y alegría"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                 />
               </div>
               <div className="absolute -bottom-5 -left-5 bg-[#070D18]/95 border border-[#159447] p-4 rounded-2xl shadow-xl flex items-center gap-3">
@@ -189,8 +190,8 @@ export const HomePage: React.FC = () => {
                   <Award size={22} />
                 </div>
                 <div>
-                  <div className="text-white font-bold text-xs">Temporada Oficial 2026 / 2027</div>
-                  <div className="text-[#F8C62B] text-[10px] font-semibold">Noviembre &bull; Diciembre &bull; Enero</div>
+                  <div className="text-white font-bold text-xs uppercase tracking-wide">Temporada Oficial 2026 / 2027</div>
+                  <div className="text-[#159447] text-[10px] font-semibold">Noviembre &bull; Diciembre &bull; Enero</div>
                 </div>
               </div>
             </div>
