@@ -18,6 +18,7 @@ import { tripService } from '../services/tripService';
 import { surveyService, Survey } from '../services/surveyService';
 import { PassengerSurveyModal } from '../components/survey/PassengerSurveyModal';
 import { FlexibleGallery } from '../components/gallery/FlexibleGallery';
+import { GroupAccessModal } from '../components/gallery/GroupAccessModal';
 import { Vuelta } from '../types';
 
 function formatTripDate(dateStr: string): string {
@@ -48,6 +49,9 @@ export const GalleryPage: React.FC = () => {
   const [surveyOpen, setSurveyOpen] = useState(false);
   const [dreamscdaEnabled, setDreamscdaEnabled] = useState(true);
 
+  // Group Access Protection state
+  const [isUnlocked, setIsUnlocked] = useState(false);
+
   // Share feedback
   const [shareToast, setShareToast] = useState(false);
 
@@ -64,6 +68,15 @@ export const GalleryPage: React.FC = () => {
 
         setTrip(tripData);
         setDreamscdaEnabled(appSettings?.dreamscda_banner?.enabled ?? true);
+
+        // Check if group is already unlocked in this browser
+        if (tripData) {
+          const cleanCode = tripData.code.trim().toUpperCase().replace(/^#/, '');
+          const isSaved = localStorage.getItem(`unlocked_group_${cleanCode}`) === 'true';
+          if (isSaved) {
+            setIsUnlocked(true);
+          }
+        }
 
         // Check active surveys or specific encuesta parameter from URL
         const encuestaParam = searchParams.get('encuesta');
@@ -139,8 +152,15 @@ export const GalleryPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#070D18] text-slate-100 pt-28 pb-20 selection:bg-[#159447] selection:text-white">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+    <div className="min-h-screen bg-[#070D18] text-slate-100 pt-28 pb-20 selection:bg-[#159447] selection:text-white relative">
+      {/* Content wrapper with blur filter when locked */}
+      <div
+        className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 transition-all duration-500 ${
+          !isUnlocked
+            ? 'filter blur-2xl pointer-events-none select-none max-h-[85vh] overflow-hidden opacity-30'
+            : 'opacity-100'
+        }`}
+      >
         
         {/* ============================================================ */}
         {/* 1. TOP NAV BAR: VOLVER & COMPARTIR (Imagen de referencia) */}
@@ -303,8 +323,23 @@ export const GalleryPage: React.FC = () => {
 
       </div>
 
+      {/* GROUP ACCESS PROTECTION MODAL */}
+      <GroupAccessModal
+        isOpen={!isUnlocked}
+        tripCode={trip.code}
+        schools={trip.schools || []}
+        onSuccess={() => setIsUnlocked(true)}
+        onClose={() => {
+          if (window.history.length > 1) {
+            navigate(-1);
+          } else {
+            navigate('/buscar');
+          }
+        }}
+      />
+
       {/* PASSENGER SURVEY MODAL */}
-      {activeSurvey && (
+      {activeSurvey && isUnlocked && (
         <PassengerSurveyModal
           survey={activeSurvey}
           groupCode={trip.code}
