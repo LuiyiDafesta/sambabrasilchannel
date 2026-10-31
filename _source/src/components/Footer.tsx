@@ -139,11 +139,11 @@ export const Footer: React.FC = () => {
               <Instagram size={18} />
             </a>
             <a
-              href="https://youtube.com"
+              href="https://www.youtube.com/@DREAMSCDA"
               target="_blank"
               rel="noopener noreferrer"
               className="w-10 h-10 rounded-full bg-white/5 hover:bg-[#159447] flex items-center justify-center text-white border border-white/10 hover:border-[#159447] transition-all shadow-sm hover:shadow-[0_0_15px_rgba(21,148,71,0.4)]"
-              aria-label="YouTube Samba Brasil Channel"
+              aria-label="YouTube DreamsCDA"
             >
               <Youtube size={18} />
             </a>
