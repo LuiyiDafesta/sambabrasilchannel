@@ -104,7 +104,7 @@ export const HomePage: React.FC = () => {
 
           {/* Benefit 2 */}
           <a
-            href="https://fotos.dreamscda.com.ar"
+            href="https://dreamscda.com.ar/"
             target="_blank"
             rel="noopener noreferrer"
             className="bg-[#0A121E]/90 border border-white/10 rounded-2xl p-5 sm:p-6 text-center hover:border-[#F8C62B]/50 hover:shadow-[0_0_20px_rgba(248,198,43,0.15)] transition-all group block"
@@ -265,7 +265,7 @@ export const HomePage: React.FC = () => {
               </p>
 
               <a
-                href="https://fotos.dreamscda.com.ar"
+                href="https://dreamscda.com.ar/"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2.5 bg-[#F8C62B] hover:bg-[#e4b21e] text-black font-outfit font-black text-xs sm:text-sm uppercase tracking-wider px-8 py-4 rounded-xl shadow-lg shadow-[#F8C62B]/25 transform hover:-translate-y-0.5 transition-all cursor-pointer"

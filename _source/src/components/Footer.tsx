@@ -92,7 +92,7 @@ export const Footer: React.FC = () => {
 
           {/* Pill 3: DREAMSCDA (in Verde Brasil #159447, NOT orange) */}
           <a
-            href="https://fotos.dreamscda.com.ar"
+            href="https://dreamscda.com.ar/"
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center justify-center bg-[#090F19] border border-white/10 hover:border-[#159447]/50 rounded-xl py-5 px-6 text-center shadow-sm hover:shadow-[0_0_20px_rgba(21,148,71,0.2)] transition-all duration-300 group"
