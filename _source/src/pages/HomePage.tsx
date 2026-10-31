@@ -97,7 +97,7 @@ export const HomePage: React.FC = () => {
               <Camera size={22} />
             </div>
             <h3 className="font-outfit font-bold text-white text-sm sm:text-base leading-snug">
-              Fotos gratis <br /> de tu viaje
+              Fotos incluidas <br /> en tu viaje
             </h3>
             <p className="text-[11px] text-slate-400 mt-1">Descarga directa para tu colegio</p>
           </div>
@@ -236,7 +236,7 @@ export const HomePage: React.FC = () => {
             </div>
             <h3 className="font-outfit font-bold text-lg text-white mb-2">3. Descargá tus Recuerdos</h3>
             <p className="text-xs text-slate-400 leading-relaxed">
-              Ingresá al álbum unificado del grupo y descargá gratis las mejores fotos de tus amigos en Camboriú.
+              Ingresá al álbum unificado del grupo y descargá las fotos incluidas de tus amigos en Camboriú.
             </p>
           </div>
         </div>
