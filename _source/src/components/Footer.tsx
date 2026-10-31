@@ -18,7 +18,7 @@ export const Footer: React.FC = () => {
           
           {/* Card 1: Instagram */}
           <a
-            href="https://www.instagram.com/sambabrasilchannel"
+            href="https://www.instagram.com/sambabrasil.ar/"
             target="_blank"
             rel="noopener noreferrer"
             className="flex flex-col items-center justify-center text-center p-8 rounded-2xl border border-[#159447] bg-[#0A101A] hover:bg-[#0D1624] transition-all duration-300 group shadow-[0_0_20px_rgba(21,148,71,0.12)] hover:shadow-[0_0_30px_rgba(21,148,71,0.28)] transform hover:-translate-y-1 cursor-pointer"
@@ -130,11 +130,11 @@ export const Footer: React.FC = () => {
           {/* Social Icons */}
           <div className="flex items-center gap-3">
             <a
-              href="https://instagram.com/sambabrasilchannel"
+              href="https://www.instagram.com/sambabrasil.ar/"
               target="_blank"
               rel="noopener noreferrer"
               className="w-10 h-10 rounded-full bg-white/5 hover:bg-[#159447] flex items-center justify-center text-white border border-white/10 hover:border-[#159447] transition-all shadow-sm hover:shadow-[0_0_15px_rgba(21,148,71,0.4)]"
-              aria-label="Instagram Samba Brasil Channel"
+              aria-label="Instagram Samba Brasil"
             >
               <Instagram size={18} />
             </a>
