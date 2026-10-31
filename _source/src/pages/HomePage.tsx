@@ -103,20 +103,15 @@ export const HomePage: React.FC = () => {
           </div>
 
           {/* Benefit 2 */}
-          <a
-            href="https://dreamscda.com.ar/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="bg-[#0A121E]/90 border border-white/10 rounded-2xl p-5 sm:p-6 text-center hover:border-[#F8C62B]/50 hover:shadow-[0_0_20px_rgba(248,198,43,0.15)] transition-all group block"
-          >
-            <div className="w-12 h-12 rounded-xl bg-[#F8C62B]/15 border border-[#F8C62B]/30 text-[#F8C62B] flex items-center justify-center mx-auto mb-3 group-hover:scale-110 transition-transform">
+          <div className="bg-[#0A121E]/90 border border-white/10 rounded-2xl p-5 sm:p-6 text-center hover:border-[#F8C62B]/50 hover:shadow-[0_0_20px_rgba(248,198,43,0.15)] transition-all">
+            <div className="w-12 h-12 rounded-xl bg-[#F8C62B]/15 border border-[#F8C62B]/30 text-[#F8C62B] flex items-center justify-center mx-auto mb-3">
               <ShoppingBag size={22} />
             </div>
-            <h3 className="font-outfit font-bold text-white text-sm sm:text-base leading-snug group-hover:text-[#F8C62B] transition-colors">
+            <h3 className="font-outfit font-bold text-white text-sm sm:text-base leading-snug">
               Más fotos en <br /> DreamsCDA
             </h3>
             <p className="text-[11px] text-slate-400 mt-1">Packs profesionales HD</p>
-          </a>
+          </div>
 
           {/* Benefit 3 */}
           <div className="bg-[#0A121E]/90 border border-white/10 rounded-2xl p-5 sm:p-6 text-center hover:border-[#124DA0]/50 hover:shadow-[0_0_20px_rgba(18,77,160,0.15)] transition-all">
