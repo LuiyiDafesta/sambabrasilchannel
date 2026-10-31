@@ -213,7 +213,7 @@ export const tripService = {
       date,
       destination,
       transport_type: 'airplane',
-      transport_details: 'Vuelo Privado',
+      transport_details: 'Viaje de Egresados',
       coordinator_name: 'Coordinador General',
       status: 'publicada',
       cover_image:

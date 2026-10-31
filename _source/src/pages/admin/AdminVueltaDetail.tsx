@@ -250,7 +250,7 @@ export const AdminVueltaDetail: React.FC = () => {
             </div>
             <div>
               <span className="text-slate-400 block mb-1">Detalle de Transporte:</span>
-              <span className="text-slate-300">{trip.transport_details || 'Vuelo Privado Oficial'}</span>
+              <span className="text-slate-300">{trip.transport_details || 'Viaje de Egresados Oficial'}</span>
             </div>
             <div>
               <span className="text-slate-400 block mb-1">Coordinador Principal:</span>
@@ -270,7 +270,7 @@ export const AdminVueltaDetail: React.FC = () => {
           <div className="flex items-center justify-between mb-6">
             <div>
               <h3 className="font-outfit font-bold text-lg text-white">Colegios Participantes</h3>
-              <p className="text-xs text-slate-400">Contratos y distribución de pasajeros asignados a este vuelo o micro.</p>
+              <p className="text-xs text-slate-400">Contratos y distribución de pasajeros asignados a este viaje o grupo.</p>
             </div>
 
             <button

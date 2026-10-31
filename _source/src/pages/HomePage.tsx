@@ -7,6 +7,7 @@ import {
   Sparkles,
   ArrowRight,
   Plane,
+  GraduationCap,
   CheckCircle2,
   Download,
   MapPin,
@@ -35,7 +36,7 @@ export const HomePage: React.FC = () => {
   }, []);
   return (
     <div className="min-h-screen bg-[#070D18] text-slate-100 flex flex-col selection:bg-[#159447] selection:text-white">
-      
+
       {/* 1. HERO SECTION WITH RIO / CAMBORIU AMBIENCE */}
       <section
         id="hero"
@@ -57,12 +58,12 @@ export const HomePage: React.FC = () => {
         <div className="absolute top-1/3 right-10 w-80 h-80 rounded-full bg-[#F8C62B]/15 blur-[130px] pointer-events-none" />
 
         <div className="max-w-5xl mx-auto px-4 sm:px-6 relative z-10 text-center w-full">
-          
+
           {/* Official Emblem Pill */}
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-black/50 border border-[#F8C62B]/40 backdrop-blur-md text-xs sm:text-sm text-[#F8C62B] mb-6 shadow-[0_0_20px_rgba(248,198,43,0.2)] animate-fadeIn">
             <Sparkles size={16} className="text-[#F8C62B]" />
             <span className="font-bold tracking-wide">
-              Exclusivo Camboriú &bull; Vuelos Privados Oficiales
+              Exclusivo Camboriú &bull; Viajes de Egresados Oficiales
             </span>
           </div>
 
@@ -89,7 +90,7 @@ export const HomePage: React.FC = () => {
       {/* 2. 4 FEATURED BENEFITS (Exact match to reference mockup) */}
       <section className="relative z-10 py-8 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
-          
+
           {/* Benefit 1 */}
           <div className="bg-[#0A121E]/90 border border-white/10 rounded-2xl p-5 sm:p-6 text-center hover:border-[#159447]/50 hover:shadow-[0_0_20px_rgba(21,148,71,0.15)] transition-all">
             <div className="w-12 h-12 rounded-xl bg-[#159447]/15 border border-[#159447]/30 text-[#159447] flex items-center justify-center mx-auto mb-3">
@@ -125,7 +126,7 @@ export const HomePage: React.FC = () => {
             <h3 className="font-outfit font-bold text-white text-sm sm:text-base leading-snug">
               Todos los colegios <br /> de tu grupo
             </h3>
-            <p className="text-[11px] text-slate-400 mt-1">Álbum unificado por vuelo</p>
+            <p className="text-[11px] text-slate-400 mt-1">Álbum unificado por viaje de egresados</p>
           </div>
 
           {/* Benefit 4 */}
@@ -147,7 +148,7 @@ export const HomePage: React.FC = () => {
       <section id="quienes-somos" className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="bg-[#0C1424] border border-white/10 rounded-3xl p-8 sm:p-14 relative overflow-hidden shadow-2xl">
           <div className="absolute top-0 right-0 w-80 h-80 bg-[#159447]/10 rounded-full blur-[100px] pointer-events-none" />
-          
+
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center relative z-10">
             <div>
               <span className="text-xs font-bold uppercase tracking-widest text-[#159447] bg-[#159447]/10 px-3.5 py-1 rounded-full border border-[#159447]/30">
@@ -157,17 +158,17 @@ export const HomePage: React.FC = () => {
                 La experiencia audiovisual más emocionante de tu viaje.
               </h2>
               <p className="text-slate-300 text-sm sm:text-base leading-relaxed mb-6">
-                <strong>Samba Brasil Channel</strong> es la plataforma oficial de fotografía y contenido digital de los viajes de egresados a <strong>Camboriú</strong>. Operamos en exclusiva con vuelos privados para que cada grupo llegue directo a la magia del carnaval, las playas de Santa Catarina y las mejores fiestas.
+                <strong>Samba Brasil Channel</strong> es la plataforma oficial de fotografía y contenido digital de los viajes de egresados a <strong>Camboriú</strong>. Registramos en exclusiva cada viaje de egresados para que cada grupo reviva la magia del carnaval, las playas de Santa Catarina y las mejores fiestas.
               </p>
               <p className="text-slate-400 text-xs sm:text-sm leading-relaxed mb-8">
-                Las fotografías se organizan por contingente de vuelo: <strong>todos los colegios que compartieron ese viaje acceden al mismo álbum completo</strong>, para que nadie se pierda ninguna anécdota, fiesta temática ni recuerdo grupal.
+                Las fotografías se organizan por contingente: <strong>todos los colegios que compartieron ese viaje acceden al mismo álbum completo</strong>, para que nadie se pierda ninguna anécdota, fiesta temática ni recuerdo grupal.
               </p>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-black/30 border border-white/5 p-4 rounded-2xl">
-                  <Plane size={20} className="text-[#F8C62B] mb-2" />
-                  <h4 className="font-bold text-white text-xs sm:text-sm">Vuelos Exclusivos</h4>
-                  <p className="text-[11px] text-slate-400 mt-0.5">Operación de vuelos privados directa a Brasil.</p>
+                  <GraduationCap size={20} className="text-[#F8C62B] mb-2" />
+                  <h4 className="font-bold text-white text-xs sm:text-sm">Viajes de Egresados</h4>
+                  <p className="text-[11px] text-slate-400 mt-0.5">La mejor experiencia de viaje directo a Brasil.</p>
                 </div>
                 <div className="bg-black/30 border border-white/5 p-4 rounded-2xl">
                   <MapPin size={20} className="text-[#159447] mb-2" />
@@ -218,7 +219,7 @@ export const HomePage: React.FC = () => {
             </div>
             <h3 className="font-outfit font-bold text-lg text-white mb-2">1. Elegí el Mes</h3>
             <p className="text-xs text-slate-400 leading-relaxed">
-              Seleccioná Noviembre, Diciembre o Enero en el selector superior para abrir el calendario de vuelos.
+              Seleccioná Noviembre, Diciembre o Enero en el selector superior para abrir el calendario de viajes.
             </p>
           </div>
 
@@ -229,7 +230,7 @@ export const HomePage: React.FC = () => {
             </div>
             <h3 className="font-outfit font-bold text-lg text-white mb-2">2. Marcá el Día de Ingreso y tu Colegio</h3>
             <p className="text-xs text-slate-400 leading-relaxed">
-              Hacé clic en el día de ingreso a Camboriú destacado en verde para ver el recuadro con los colegios que integran ese vuelo.
+              Hacé clic en el día de ingreso a Camboriú destacado en verde para ver el recuadro con los colegios que integran ese viaje de egresados.
             </p>
           </div>
 
@@ -254,11 +255,11 @@ export const HomePage: React.FC = () => {
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#F8C62B]/20 text-[#F8C62B] text-xs font-bold uppercase tracking-wider mb-4 border border-[#F8C62B]/30">
                 <Sparkles size={14} /> Catálogo Oficial DreamsCDA
               </div>
-              
+
               <h2 className="font-outfit font-black text-2xl sm:text-4xl text-white mb-4 leading-tight">
                 ¿Querés descubrir más recuerdos de tu viaje?
               </h2>
-              
+
               <p className="text-slate-300 text-xs sm:text-base leading-relaxed mb-8">
                 Encontrá las fotos profesionales panorámicas, fotos de fiesta y packs de recuerdos en alta definición disponibles en la tienda de DreamsCDA.
               </p>

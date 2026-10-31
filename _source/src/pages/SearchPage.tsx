@@ -25,7 +25,7 @@ export const SearchPage: React.FC = () => {
             Temporada Noviembre &bull; Diciembre &bull; Enero
           </span>
           <h1 className="font-outfit font-black text-3xl sm:text-5xl text-white mt-3 mb-2">
-            Encontrá el Vuelo de tu Colegio
+            Encontrá el Viaje de Egresados de tu Colegio
           </h1>
           <p className="text-slate-400 text-xs sm:text-sm">
             Elegí el mes y día en el calendario para ver el recuadro con los colegios que compartieron ese viaje a Camboriú.

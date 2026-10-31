@@ -75,7 +75,7 @@ export const AdminVueltas: React.FC = () => {
             Vueltas
           </h1>
           <p className="text-xs text-slate-400 mt-1">
-            Listado maestro de vuelos y micros programados para la temporada.
+            Listado maestro de viajes de egresados programados para la temporada.
           </p>
         </div>
 
@@ -236,7 +236,7 @@ export const AdminVueltas: React.FC = () => {
                   onChange={(e) => setTransportType(e.target.value as TransportType)}
                   className="w-full bg-[#121D32] border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-[#159447]"
                 >
-                  <option value="airplane">Avión (Vuelo Privado)</option>
+                  <option value="airplane">Aéreo (Viaje de Egresados)</option>
                   <option value="bus">Micro (Larga Distancia)</option>
                 </select>
               </div>

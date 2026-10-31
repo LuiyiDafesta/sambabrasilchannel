@@ -8,7 +8,7 @@ export interface Vuelta {
   date: string; // YYYY-MM-DD e.g. "2026-11-14"
   destination: string; // "Camboriú"
   transport_type: TransportType; // Siempre avión
-  transport_details?: string; // e.g. "Vuelo Privado Aerolíneas / Gol"
+  transport_details?: string; // e.g. "Viaje de Egresados Aerolíneas / Gol"
   coordinator_name: string;
   status: VueltaStatus;
   cover_image: string;

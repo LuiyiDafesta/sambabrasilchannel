@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   Calendar as CalendarIcon,
   Plane,
+  GraduationCap,
   Users,
   ArrowRight,
   Sparkles,
@@ -121,8 +122,8 @@ export const TripCalendarSearch: React.FC<TripCalendarSearchProps> = ({
             </span>
             <h3 className="font-outfit font-black text-lg text-white flex items-center gap-2">
               Camboriú, Brasil
-              <span className="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-[#124DA0]/40 text-sky-300 border border-[#124DA0]">
-                Vuelos Privados
+              <span className="text-[11px] font-semibold px-2 py-0.5 rounded-md bg-[#159447]/20 text-[#159447] border border-[#159447]/30">
+                Viajes de Egresados
               </span>
             </h3>
           </div>
@@ -164,7 +165,7 @@ export const TripCalendarSearch: React.FC<TripCalendarSearchProps> = ({
                 >
                   <div className="flex items-center justify-between mb-2">
                     <span className="flex items-center gap-1.5 text-xs font-bold text-[#F8C62B]">
-                      <Plane size={15} /> Vuelo a Camboriú
+                      <GraduationCap size={15} /> Viaje a Camboriú
                     </span>
                     <span className="text-xs font-mono text-slate-300 bg-white/5 px-2 py-0.5 rounded">
                       {trip.date}
@@ -173,7 +174,7 @@ export const TripCalendarSearch: React.FC<TripCalendarSearchProps> = ({
 
                   <div className="mb-4">
                     <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider block mb-1.5">
-                      Colegios en este vuelo:
+                      Colegios en este viaje:
                     </span>
                     <div className="flex flex-wrap gap-1.5">
                       {trip.schools.map((sch) => (
@@ -300,7 +301,7 @@ export const TripCalendarSearch: React.FC<TripCalendarSearchProps> = ({
           {selectedDay && (
             <div className="animate-fadeIn">
               <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">
-                3. Vuelos con ingreso el {selectedDay} de {currentMonthData.label}:
+                3. Viajes con ingreso el {selectedDay} de {currentMonthData.label}:
               </label>
 
               {tripsOnSelectedDay.length > 0 ? (
@@ -311,15 +312,15 @@ export const TripCalendarSearch: React.FC<TripCalendarSearchProps> = ({
                       onClick={() => handleSelectTrip(trip)}
                       className="bg-gradient-to-r from-[#121D32] to-[#0E1728] border-2 border-[#159447] rounded-3xl p-5 sm:p-7 shadow-xl hover:shadow-[0_0_30px_rgba(21,148,71,0.3)] transition-all cursor-pointer group transform hover:-translate-y-0.5"
                     >
-                      {/* Flight Header */}
+                      {/* Trip Header */}
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-white/10 gap-2 mb-4">
                         <div className="flex items-center gap-2.5">
                           <div className="w-10 h-10 rounded-xl bg-[#159447]/20 text-[#159447] flex items-center justify-center">
-                            <Plane size={22} className="text-[#F8C62B]" />
+                            <GraduationCap size={22} className="text-[#F8C62B]" />
                           </div>
                           <div>
                             <span className="text-[10px] font-bold uppercase tracking-wider text-[#F8C62B]">
-                              Vuelo Oficial a Camboriú
+                              Viaje Oficial a Camboriú
                             </span>
                             <h4 className="font-outfit font-black text-lg text-white">
                               Ingreso a Camboriú: {selectedDay} de {currentMonthData.label}
@@ -374,7 +375,7 @@ export const TripCalendarSearch: React.FC<TripCalendarSearchProps> = ({
               ) : (
                 <div className="text-center py-10 bg-[#090F1C] rounded-2xl border border-white/10 px-4">
                   <p className="text-xs sm:text-sm text-slate-400 mb-2">
-                    No hay vuelos programados para el <strong className="text-white">{selectedDay} de {currentMonthData.label}</strong>.
+                    No hay viajes programados para el <strong className="text-white">{selectedDay} de {currentMonthData.label}</strong>.
                   </p>
                   <p className="text-xs text-[#F8C62B]">
                     Hacé clic en los días marcados con punto verde en el calendario.
