@@ -108,7 +108,7 @@ export const TripCalendarSearch: React.FC<TripCalendarSearchProps> = ({
   const weekDays = ['Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sá', 'Do'];
 
   return (
-    <div className={`bg-[#0C1424]/95 border border-white/15 rounded-3xl p-5 sm:p-8 shadow-2xl backdrop-blur-xl ${className}`}>
+    <div className={`bg-[#0C1424]/95 border border-white/15 rounded-3xl p-4 sm:p-8 shadow-2xl backdrop-blur-xl w-full max-w-full overflow-hidden ${className}`}>
       
       {/* Destination & Season Badge Header */}
       <div className="flex flex-wrap items-center justify-between gap-3 pb-6 border-b border-white/10 mb-6">
@@ -233,16 +233,16 @@ export const TripCalendarSearch: React.FC<TripCalendarSearchProps> = ({
           </div>
 
           {/* STEP 2: CALENDAR GRID FOR SELECTED MONTH */}
-          <div className="mb-6 bg-[#090F1C] border border-white/10 rounded-2xl p-4 sm:p-6">
-            <div className="flex items-center justify-between mb-4">
+          <div className="mb-6 bg-[#090F1C] border border-white/10 rounded-2xl p-3 sm:p-6 overflow-hidden">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
               <div className="flex items-center gap-2">
-                <CalendarIcon size={16} className="text-[#159447]" />
-                <h4 className="font-outfit font-bold text-sm sm:text-base text-white">
+                <CalendarIcon size={16} className="text-[#159447] shrink-0" />
+                <h4 className="font-outfit font-bold text-xs sm:text-base text-white">
                   Calendario de Ingresos &bull; {currentMonthData.label}
                 </h4>
               </div>
-              <span className="text-[11px] text-slate-400 flex items-center gap-1.5">
-                <span className="w-2.5 h-2.5 rounded-full bg-[#159447] shadow-[0_0_8px_#159447]" />
+              <span className="text-[10px] sm:text-[11px] text-slate-400 flex items-center gap-1.5 shrink-0">
+                <span className="w-2.5 h-2.5 rounded-full bg-[#159447] shadow-[0_0_8px_#159447] shrink-0" />
                 Días de ingreso a Camboriú
               </span>
             </div>

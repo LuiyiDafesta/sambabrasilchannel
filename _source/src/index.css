@@ -10,14 +10,34 @@
     --font-outfit: 'Outfit', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   }
 
+  html {
+    scroll-behavior: smooth;
+    overflow-x: hidden;
+    width: 100%;
+    max-width: 100vw;
+    -webkit-text-size-adjust: 100%;
+  }
+
   body {
     @apply bg-[#070D18] text-slate-100 font-sans antialiased min-h-screen selection:bg-[#159447] selection:text-white;
     overflow-x: hidden;
+    width: 100%;
+    max-width: 100vw;
+    position: relative;
+    -webkit-overflow-scrolling: touch;
   }
 
-  /* Smooth scroll behavior */
-  html {
-    scroll-behavior: smooth;
+  #root {
+    width: 100%;
+    max-width: 100vw;
+    overflow-x: hidden;
+    position: relative;
+    min-height: 100vh;
+  }
+
+  /* Prevent any image, svg, canvas or iframe from forcing layout width */
+  img, svg, video, canvas, iframe {
+    max-width: 100%;
   }
 }
 

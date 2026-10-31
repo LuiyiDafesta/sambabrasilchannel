@@ -86,7 +86,7 @@ export const GroupAccessModal: React.FC<GroupAccessModalProps> = ({
         </div>
 
         {/* Schools / Group Big Title */}
-        <h2 className="font-outfit font-black text-xl sm:text-2xl text-white uppercase tracking-tight leading-tight mb-2">
+        <h2 className="font-outfit font-black text-xl sm:text-2xl text-white uppercase tracking-tight leading-tight mb-2 break-words">
           {schoolNamesString}
         </h2>
 

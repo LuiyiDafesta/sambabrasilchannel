@@ -380,7 +380,7 @@ export const FlexibleGallery: React.FC<FlexibleGalleryProps> = ({
               {selectedPhotoIds.size} DE {photos.length} SELECCIONADAS
             </span>
 
-            <div className="flex items-center gap-2 text-xs font-semibold text-slate-300">
+            <div className="flex flex-wrap items-center gap-2 text-xs font-semibold text-slate-300">
               <button
                 type="button"
                 onClick={handleSelectCurrentPage}
@@ -500,7 +500,7 @@ export const FlexibleGallery: React.FC<FlexibleGalleryProps> = ({
                     {photo.filename || `Foto #${photoNumber}`}
                   </span>
 
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex flex-wrap items-center justify-center gap-1.5">
                     {/* Botón Descarga Individual Directa (Sin ZIP) */}
                     <button
                       type="button"
@@ -550,7 +550,7 @@ export const FlexibleGallery: React.FC<FlexibleGalleryProps> = ({
             de <strong className="text-white">{photos.length}</strong> fotos
           </div>
 
-          <div className="flex items-center gap-1.5">
+          <div className="flex flex-wrap items-center justify-center gap-1.5">
             {/* Prev Page */}
             <button
               type="button"

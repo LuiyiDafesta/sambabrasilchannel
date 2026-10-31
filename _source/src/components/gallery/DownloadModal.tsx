@@ -56,7 +56,7 @@ export const DownloadModal: React.FC<DownloadModalProps> = ({
             DESCARGAR {count} {count === 1 ? 'FOTO' : 'FOTOS'}
           </h2>
 
-          <p className="text-xs text-slate-300 mt-1.5 leading-relaxed font-medium">
+          <p className="text-xs text-slate-300 mt-1.5 leading-relaxed font-medium break-words">
             <span className="text-white font-bold">{schoolsText}</span> &bull; Elegí cómo preferís descargar tus recuerdos:
           </p>
         </div>

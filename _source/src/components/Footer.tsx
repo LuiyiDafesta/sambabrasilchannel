@@ -7,7 +7,7 @@ export const Footer: React.FC = () => {
   const [contactSent, setContactSent] = useState(false);
 
   return (
-    <footer className="bg-[#05090F] pt-16 pb-10 border-t border-white/10 select-none font-sans relative z-20 text-slate-200">
+    <footer className="bg-[#05090F] pt-16 pb-10 border-t border-white/10 select-none font-sans relative z-20 text-slate-200 overflow-hidden w-full max-w-full">
       {/* Symmetrical glowing background radial light in Verde Brasil */}
       <div className="absolute bottom-1/3 left-1/2 -translate-x-1/2 w-[550px] h-[300px] rounded-full bg-[#159447]/10 blur-[130px] pointer-events-none" />
 

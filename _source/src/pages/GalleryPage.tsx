@@ -152,14 +152,14 @@ export const GalleryPage: React.FC = () => {
   };
 
   return (
-        <div className="min-h-screen bg-[#070D18] text-slate-100 pt-28 pb-20 selection:bg-[#159447] selection:text-white relative">
-          {/* Content wrapper with blur filter when locked */}
-          <div
-            className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 transition-all duration-500 ${!isUnlocked
-              ? 'filter blur-2xl pointer-events-none select-none max-h-[85vh] overflow-hidden opacity-30'
-              : 'opacity-100'
-              }`}
-          >
+    <div className="min-h-screen bg-[#070D18] text-slate-100 pt-28 pb-20 selection:bg-[#159447] selection:text-white relative w-full max-w-full overflow-x-hidden">
+      {/* Content wrapper with blur filter when locked */}
+      <div
+        className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8 transition-all duration-500 ${!isUnlocked
+          ? 'filter blur-2xl pointer-events-none select-none max-h-[85vh] overflow-hidden opacity-30'
+          : 'opacity-100'
+          }`}
+      >
 
             {/* ============================================================ */}
             {/* 1. TOP NAV BAR: VOLVER & COMPARTIR (Imagen de referencia) */}
@@ -212,7 +212,7 @@ export const GalleryPage: React.FC = () => {
               </div>
 
               {/* Gran Título con los Colegios del Grupo en Gigante */}
-              <h1 className="font-outfit font-black text-3xl sm:text-5xl lg:text-6xl text-white uppercase tracking-tight leading-[1.08]">
+              <h1 className="font-outfit font-black text-2xl sm:text-4xl md:text-5xl lg:text-6xl text-white uppercase tracking-tight leading-[1.08] break-words">
                 {schoolsText}
               </h1>
 

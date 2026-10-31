@@ -35,7 +35,7 @@ export const HomePage: React.FC = () => {
     loadSettings();
   }, []);
   return (
-    <div className="min-h-screen bg-[#070D18] text-slate-100 flex flex-col selection:bg-[#159447] selection:text-white">
+    <div className="min-h-screen bg-[#070D18] text-slate-100 flex flex-col selection:bg-[#159447] selection:text-white w-full max-w-full overflow-x-hidden">
 
       {/* 1. HERO SECTION WITH RIO / CAMBORIU AMBIENCE */}
       <section
@@ -181,7 +181,7 @@ export const HomePage: React.FC = () => {
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                 />
               </div>
-              <div className="absolute -bottom-5 -left-5 bg-[#070D18]/95 border border-[#159447] p-4 rounded-2xl shadow-xl flex items-center gap-3">
+              <div className="absolute -bottom-3 left-3 sm:-bottom-5 sm:-left-5 bg-[#070D18]/95 border border-[#159447] p-3 sm:p-4 rounded-2xl shadow-xl flex items-center gap-3 max-w-[92%]">
                 <div className="w-10 h-10 rounded-xl bg-[#159447]/20 flex items-center justify-center text-[#159447]">
                   <Award size={22} />
                 </div>
