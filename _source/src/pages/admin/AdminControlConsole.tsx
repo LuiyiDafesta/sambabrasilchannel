@@ -33,6 +33,7 @@ import { uploadImage, getCdnUrl } from '../../lib/storage';
 import { useAuth } from '../../context/AuthContext';
 import { Vuelta, Fotografia } from '../../types';
 import { AdminSurveyTab } from '../../components/admin/AdminSurveyTab';
+import { AdminMetricsTab } from '../../components/admin/AdminMetricsTab';
 
 interface UploadQueueItem {
   id: string;
@@ -536,23 +537,8 @@ export const AdminControlConsole: React.FC = () => {
         {/* VIEW: SISTEMA DE ENCUESTAS & LEADS CRM */}
         {activeTab === 'encuestas' && <AdminSurveyTab />}
 
-        {/* VIEW: ESTADISTICAS PLACEHOLDER */}
-        {activeTab === 'estadisticas' && (
-          <div className="bg-[#0C1424] border border-white/10 rounded-3xl p-12 text-center max-w-xl mx-auto my-8">
-            <div className="w-16 h-16 rounded-2xl bg-[#159447]/10 border border-[#159447]/30 text-[#159447] flex items-center justify-center mx-auto mb-4">
-              <BarChart3 size={28} />
-            </div>
-            <h3 className="font-outfit font-black text-xl text-white uppercase tracking-wider mb-2">
-              Métricas y Estadísticas
-            </h3>
-            <p className="text-slate-400 text-xs sm:text-sm leading-relaxed mb-6">
-              Visualización de visualizaciones de fotos, descargas HD, colegios registrados y actividad en tiempo real.
-            </p>
-            <span className="inline-flex px-3 py-1 rounded-full bg-[#159447]/15 border border-[#159447]/40 text-[#159447] text-xs font-bold uppercase">
-              Próximamente disponible
-            </span>
-          </div>
-        )}
+        {/* VIEW: MÉTRICAS Y ESTADÍSTICAS EN TIEMPO REAL */}
+        {activeTab === 'estadisticas' && <AdminMetricsTab />}
 
         {/* VIEW: GESTIÓN DE COLEGIOS (SUBVIEW: GALLERY OR GROUPS TABLE) */}
         {activeTab === 'colegios' && (

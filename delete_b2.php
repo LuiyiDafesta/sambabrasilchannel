@@ -146,3 +146,4 @@ function deleteSigV4($host, $bucket, $region, $accessKey, $secretKey, $objectKey
     $errorMsg = "HTTP {$httpCode} - {$response} - {$curlErr}";
     return false;
 }
+
