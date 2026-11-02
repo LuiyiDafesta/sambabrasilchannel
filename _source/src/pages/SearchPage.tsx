@@ -4,7 +4,7 @@ import { TripCalendarSearch } from '../components/search/TripCalendarSearch';
 
 export const SearchPage: React.FC = () => {
   const [searchParams] = useSearchParams();
-  const queryDate = searchParams.get('fecha') || '2026-11-12';
+  const queryDate = searchParams.get('fecha') || undefined;
 
   return (
     <div className="min-h-screen bg-[#070D18] text-slate-100 pt-28 pb-20 selection:bg-[#159447] selection:text-white w-full max-w-full overflow-x-hidden">

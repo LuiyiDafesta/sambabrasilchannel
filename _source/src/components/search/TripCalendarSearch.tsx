@@ -40,14 +40,20 @@ export const TripCalendarSearch: React.FC<TripCalendarSearchProps> = ({
 
   const [allTrips, setAllTrips] = useState<Vuelta[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedMonthKey, setSelectedMonthKey] = useState<string>(initialMonth);
-  // Default selected date if within current month, or the first trip of that month
+  const [selectedMonthKey, setSelectedMonthKey] = useState<string>(() => {
+    if (initialDate) {
+      const parts = initialDate.split('-');
+      if (parts.length >= 2) return `${parts[0]}-${parts[1]}`;
+    }
+    return initialMonth;
+  });
+  // Default selected date: null until real trips load, then pick the earliest trip of that month
   const [selectedDay, setSelectedDay] = useState<number | null>(() => {
     if (initialDate) {
       const parts = initialDate.split('-');
-      return parseInt(parts[2], 10);
+      if (parts.length >= 3) return parseInt(parts[2], 10);
     }
-    return 12; // 12 Noviembre default
+    return null;
   });
 
   // School name filter
@@ -56,15 +62,49 @@ export const TripCalendarSearch: React.FC<TripCalendarSearchProps> = ({
   useEffect(() => {
     let isMounted = true;
     tripService.getAllTrips().then((data) => {
-      if (isMounted) {
-        setAllTrips(data);
-        setLoading(false);
+      if (!isMounted) return;
+      setAllTrips(data);
+      setLoading(false);
+
+      if (data && data.length > 0) {
+        // If an initialDate was explicitly provided and exists in trips, select it
+        if (initialDate) {
+          const matching = data.find((t) => t.date === initialDate);
+          if (matching) {
+            const parts = matching.date.split('-');
+            setSelectedMonthKey(`${parts[0]}-${parts[1]}`);
+            setSelectedDay(parseInt(parts[2], 10));
+            return;
+          }
+        }
+
+        // Otherwise, find trips in the currently selected month
+        const tripsInMonth = data
+          .filter((t) => t.date.startsWith(selectedMonthKey))
+          .sort((a, b) => a.date.localeCompare(b.date));
+
+        if (tripsInMonth.length > 0) {
+          const dayNum = parseInt(tripsInMonth[0].date.split('-')[2], 10);
+          setSelectedDay(dayNum);
+        } else {
+          // If no trips in current month, find first available trip in any available season month
+          const firstSeasonTrip = data.find((t) =>
+            availableMonths.some((m) => t.date.startsWith(m.key))
+          );
+          if (firstSeasonTrip) {
+            const parts = firstSeasonTrip.date.split('-');
+            setSelectedMonthKey(`${parts[0]}-${parts[1]}`);
+            setSelectedDay(parseInt(parts[2], 10));
+          } else {
+            setSelectedDay(null);
+          }
+        }
       }
     });
     return () => {
       isMounted = false;
     };
-  }, []);
+  }, [initialDate, selectedMonthKey]);
 
   const currentMonthData = availableMonths.find((m) => m.key === selectedMonthKey) || availableMonths[0];
 
@@ -95,10 +135,13 @@ export const TripCalendarSearch: React.FC<TripCalendarSearchProps> = ({
 
   const handleMonthChange = (monthKey: string) => {
     setSelectedMonthKey(monthKey);
-    // Find first trip of this month
-    const firstTrip = allTrips.find((t) => t.date.startsWith(monthKey));
-    if (firstTrip) {
-      const dayNum = parseInt(firstTrip.date.split('-')[2], 10);
+    // Find first trip of this month (sorted by day ascending)
+    const tripsInMonth = allTrips
+      .filter((t) => t.date.startsWith(monthKey))
+      .sort((a, b) => a.date.localeCompare(b.date));
+
+    if (tripsInMonth.length > 0) {
+      const dayNum = parseInt(tripsInMonth[0].date.split('-')[2], 10);
       setSelectedDay(dayNum);
     } else {
       setSelectedDay(null);
