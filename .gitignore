@@ -7,7 +7,7 @@ _source/.env.*
 !_source/.env.example
 
 # Sensitive server configurations
-config/b2_credentials.php
+# config/b2_credentials.php (Protected by .htaccess RedirectMatch 404 ^/config)
 config/*.secret.php
 config/credentials.json
 

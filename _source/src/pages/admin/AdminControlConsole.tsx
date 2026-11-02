@@ -29,7 +29,7 @@ import {
   LogOut,
 } from 'lucide-react';
 import { tripService } from '../../services/tripService';
-import { uploadImage } from '../../lib/storage';
+import { uploadImage, getCdnUrl } from '../../lib/storage';
 import { useAuth } from '../../context/AuthContext';
 import { Vuelta, Fotografia } from '../../types';
 import { AdminSurveyTab } from '../../components/admin/AdminSurveyTab';
@@ -351,10 +351,12 @@ export const AdminControlConsole: React.FC = () => {
           const res = await uploadImage(nextItem.file, `grupos/${activeGalleryTrip.code.toLowerCase()}`);
           if (res.url) {
             uploadedUrl = res.url;
+          } else {
+            throw new Error('El servidor no retornó una URL válida');
           }
-        } catch (uploadErr) {
-          console.warn('[Queue Upload] PHP/B2 upload failed, using local CDN fallback:', uploadErr);
-          uploadedUrl = URL.createObjectURL(nextItem.file);
+        } catch (uploadErr: any) {
+          console.error('[Queue Upload] PHP/B2 upload failed:', uploadErr);
+          throw new Error(uploadErr?.message || 'Error al subir la fotografía al servidor');
         }
 
         // Register in Supabase photos table
@@ -740,9 +742,12 @@ export const AdminControlConsole: React.FC = () => {
                               className="group relative rounded-2xl overflow-hidden bg-black border border-white/10 hover:border-white/20 transition-all shadow-lg aspect-[4/3]"
                             >
                               <img
-                                src={photo.url}
+                                src={getCdnUrl(photo.url)}
                                 alt={photo.filename}
                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                onError={(e) => {
+                                  (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80';
+                                }}
                               />
 
                               {/* Top Bar Badges */}

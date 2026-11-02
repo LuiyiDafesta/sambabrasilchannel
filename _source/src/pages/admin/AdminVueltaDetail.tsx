@@ -95,18 +95,12 @@ export const AdminVueltaDetail: React.FC = () => {
               created_at: new Date().toISOString(),
             });
             count++;
+          } else {
+            throw new Error(res.error || 'Error al procesar la subida');
           }
-        } catch (uploadErr) {
-          // If server PHP upload isn't running in local vite dev, create photo preview
-          const localPreviewUrl = URL.createObjectURL(file);
-          await tripService.addPhoto(trip.id, {
-            url: localPreviewUrl,
-            category: 'momentos',
-            filename: file.name,
-            file_size: file.size,
-            created_at: new Date().toISOString(),
-          });
-          count++;
+        } catch (uploadErr: any) {
+          console.error('[AdminVueltaDetail] Error al subir foto:', uploadErr);
+          setUploadError(`Error al subir ${file.name}: ${uploadErr.message || 'Error de conexión'}`);
         }
       }
       setUploadSuccess(`Se procesaron ${count} fotografías correctamente para el álbum.`);

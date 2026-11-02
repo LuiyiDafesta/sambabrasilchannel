@@ -49,6 +49,10 @@ export function getCdnUrl(objectKey: string): string {
   if (objectKey.startsWith('http://') || objectKey.startsWith('https://')) {
     return objectKey;
   }
+  // If blob or data URI, return as-is
+  if (objectKey.startsWith('blob:') || objectKey.startsWith('data:')) {
+    return objectKey;
+  }
   // Otherwise append path to CDN_BASE_URL
   return `${CDN_BASE_URL}/${objectKey.replace(/^\/+/, '')}`;
 }

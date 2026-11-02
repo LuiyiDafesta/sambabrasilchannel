@@ -466,6 +466,9 @@ export const FlexibleGallery: React.FC<FlexibleGalleryProps> = ({
                   alt={photo.filename || `Foto ${photoNumber}`}
                   loading="lazy"
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  onError={(e) => {
+                    (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80';
+                  }}
                 />
 
                 {/* Ambient shadow gradient */}
@@ -668,6 +671,9 @@ export const FlexibleGallery: React.FC<FlexibleGalleryProps> = ({
               src={getCdnUrl(activeLightboxPhoto.url)}
               alt={activeLightboxPhoto.filename || 'Foto'}
               className="max-w-full max-h-[80vh] object-contain rounded-2xl shadow-2xl"
+              onError={(e) => {
+                (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=85';
+              }}
             />
           </div>
         </div>

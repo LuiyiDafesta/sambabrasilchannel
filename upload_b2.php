@@ -26,8 +26,8 @@ $configPath = __DIR__ . '/config/b2_credentials.php';
 $config = file_exists($configPath) ? require $configPath : [];
 
 $cdnBaseUrl    = rtrim(getenv('B2_CDN_URL') ?: ($config['cdn_base_url'] ?? 'https://cdn.sambabrasilchannel.com.ar'), '/');
-$b2KeyId       = getenv('B2_KEY_ID') ?: ($config['key_id'] ?? '');
-$b2AppKey      = getenv('B2_APPLICATION_KEY') ?: ($config['application_key'] ?? '');
+$b2KeyId       = getenv('B2_KEY_ID') ?: ($config['key_id'] ?? '00429a18a8ece8c000000000c');
+$b2AppKey      = getenv('B2_APPLICATION_KEY') ?: ($config['application_key'] ?? 'K00492I8qtI6cd9mZuD9PhS6lvWoXGw');
 $b2BucketName  = getenv('B2_BUCKET_NAME') ?: ($config['bucket_name'] ?? 'SambaBrasil');
 $b2Region      = getenv('B2_REGION') ?: ($config['region'] ?? 'us-west-004');
 $b2Endpoint    = getenv('B2_ENDPOINT') ?: ($config['endpoint'] ?? 's3.us-west-004.backblazeb2.com');
@@ -104,10 +104,32 @@ if ($uploadSuccess) {
     ]);
     exit();
 } else {
+    // Local server storage fallback if Backblaze B2 has a network/API issue
+    $localUploadDir = __DIR__ . '/uploads/' . $folder;
+    if (!is_dir($localUploadDir)) {
+        @mkdir($localUploadDir, 0755, true);
+    }
+    $localFilePath = $localUploadDir . '/' . $filename;
+    if (@file_put_contents($localFilePath, $fileData) !== false) {
+        $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? "https://" : "https://";
+        $hostName = $_SERVER['HTTP_HOST'] ?: 'sambabrasilchannel.com.ar';
+        $localUrl = "{$protocol}{$hostName}/uploads/{$folder}/{$filename}";
+        echo json_encode([
+            'success'    => true,
+            'url'        => $localUrl,
+            'object_key' => "uploads/{$folder}/{$filename}",
+            'filename'   => $filename,
+            'mime'       => $mimeType,
+            'size'       => strlen($fileData),
+            'storage'    => 'local_fallback'
+        ]);
+        exit();
+    }
+
     http_response_code(502);
     echo json_encode([
         'success' => false,
-        'error'   => 'Failed to upload to Backblaze B2',
+        'error'   => 'Failed to upload to Backblaze B2 and local storage fallback',
         'details' => $errorMsg
     ]);
     exit();

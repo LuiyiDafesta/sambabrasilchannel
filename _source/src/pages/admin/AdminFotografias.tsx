@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Camera, ExternalLink, Trash2 } from 'lucide-react';
 import { tripService } from '../../services/tripService';
+import { getCdnUrl } from '../../lib/storage';
 import { Vuelta, Fotografia } from '../../types';
 
 export const AdminFotografias: React.FC = () => {
@@ -68,7 +69,14 @@ export const AdminFotografias: React.FC = () => {
         <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-6 gap-4">
           {filtered.map((p) => (
             <div key={p.id} className="aspect-square rounded-2xl overflow-hidden bg-black border border-white/10 relative group">
-              <img src={p.url} alt={p.filename} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+              <img
+                src={getCdnUrl(p.url)}
+                alt={p.filename}
+                className="w-full h-full object-cover group-hover:scale-105 transition-transform"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80';
+                }}
+              />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity p-2.5 flex flex-col justify-between text-[10px]">
                 <div className="flex items-center justify-between gap-1">
                   <span className="text-slate-300 font-mono truncate">{p.filename}</span>
