@@ -112,9 +112,9 @@ export const AdminVueltaDetail: React.FC = () => {
     }
   };
 
-  const handleDeletePhoto = async (photoId: string) => {
-    if (!confirm('¿Seguro que deseas eliminar esta fotografía del álbum?')) return;
-    await tripService.deletePhoto(photoId);
+  const handleDeletePhoto = async (photoId: string, photoUrl?: string) => {
+    if (!confirm('¿Seguro que deseas eliminar esta fotografía del álbum y de Backblaze?')) return;
+    await tripService.deletePhoto(photoId, photoUrl);
     loadTrip();
   };
 
@@ -395,7 +395,7 @@ export const AdminVueltaDetail: React.FC = () => {
                         <span className="truncate max-w-[80%]">{p.filename}</span>
                         <button
                           type="button"
-                          onClick={() => handleDeletePhoto(p.id)}
+                          onClick={() => handleDeletePhoto(p.id, p.url)}
                           className="p-1 rounded-md bg-rose-500/20 text-rose-400 hover:bg-rose-500 hover:text-white transition-colors"
                           title="Eliminar foto del álbum"
                         >

@@ -399,10 +399,10 @@ export const AdminControlConsole: React.FC = () => {
     await loadTrips();
   };
 
-  // Delete Photo from Album
-  const handleDeletePhoto = async (photoId: string) => {
+  // Delete Photo from Album (removes from B2 and database)
+  const handleDeletePhoto = async (photoId: string, photoUrl?: string) => {
     if (!confirm('¿Deseas eliminar esta fotografía de la galería del grupo?')) return;
-    await tripService.deletePhoto(photoId);
+    await tripService.deletePhoto(photoId, photoUrl);
     await loadTrips();
   };
 
@@ -792,7 +792,7 @@ export const AdminControlConsole: React.FC = () => {
                                     </a>
                                     <button
                                       type="button"
-                                      onClick={() => handleDeletePhoto(photo.id)}
+                                      onClick={() => handleDeletePhoto(photo.id, photo.url)}
                                       className="p-1.5 rounded-lg bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white transition-colors"
                                       title="Eliminar fotografía"
                                     >

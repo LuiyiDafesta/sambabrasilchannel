@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase';
+import { deleteImage } from '../lib/storage';
 import { Vuelta, AdminStats, Colegio, Fotografia } from '../types';
 import { MOCK_TRIPS, INITIAL_STATS } from '../data/mockTrips';
 
@@ -177,10 +178,21 @@ export const tripService = {
   },
 
   /**
-   * Delete a complete trip / group (cascades to schools and photos)
+   * Delete a complete trip / group (cleans up photos from Backblaze B2/storage and cascades)
    */
   async deleteTrip(vueltaId: string): Promise<boolean> {
     try {
+      // 1. Fetch all photos associated with this trip to clean them up from Backblaze B2
+      const { data: tripPhotos } = await supabase
+        .from('photos')
+        .select('url')
+        .eq('vuelta_id', vueltaId);
+
+      if (tripPhotos && tripPhotos.length > 0) {
+        await Promise.allSettled(tripPhotos.map((p) => deleteImage(p.url)));
+      }
+
+      // 2. Delete trip in Supabase (cascades to schools and photos)
       const { error } = await supabase.from('vueltas').delete().eq('id', vueltaId);
       if (error) {
         console.error('[TripService] Error deleting trip:', error.message);
@@ -427,10 +439,25 @@ export const tripService = {
   },
 
   /**
-   * Delete photo from trip (Admin only via Supabase RLS)
+   * Delete photo from trip (deletes physical file from Backblaze B2/storage and removes Supabase record)
    */
-  async deletePhoto(photoId: string): Promise<boolean> {
+  async deletePhoto(photoId: string, photoUrl?: string): Promise<boolean> {
     try {
+      // 1. If photoUrl wasn't passed, query Supabase to get the exact file URL
+      let urlToDelete = photoUrl;
+      if (!urlToDelete) {
+        const { data: pData } = await supabase.from('photos').select('url').eq('id', photoId).maybeSingle();
+        if (pData?.url) {
+          urlToDelete = pData.url;
+        }
+      }
+
+      // 2. Delete the actual file from Backblaze B2 / storage
+      if (urlToDelete) {
+        await deleteImage(urlToDelete);
+      }
+
+      // 3. Delete from Supabase database
       const { error } = await supabase.from('photos').delete().eq('id', photoId);
       if (!error) return true;
       if (error) console.error('[TripService] Error deleting photo:', error.message);

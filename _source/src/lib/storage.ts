@@ -5,6 +5,7 @@
 
 export const CDN_BASE_URL = import.meta.env.VITE_CDN_URL || 'https://cdn.sambabrasilchannel.com.ar';
 export const UPLOAD_API = import.meta.env.VITE_UPLOAD_API || '/upload_b2.php';
+export const DELETE_API = import.meta.env.VITE_DELETE_API || '/delete_b2.php';
 
 export interface UploadResult {
   success: boolean;
@@ -14,6 +15,28 @@ export interface UploadResult {
   mime?: string;
   size?: number;
   error?: string;
+}
+
+export async function deleteImage(urlOrKey: string): Promise<boolean> {
+  if (!urlOrKey) return false;
+  try {
+    const response = await fetch(DELETE_API, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ url: urlOrKey }),
+    });
+    if (!response.ok) {
+      console.warn(`[Storage] Failed to delete image ${urlOrKey}: HTTP ${response.status}`);
+      return false;
+    }
+    const data = await response.json().catch(() => ({}));
+    return !!data.success;
+  } catch (err) {
+    console.warn(`[Storage] Error deleting image from B2/storage:`, err);
+    return false;
+  }
 }
 
 export async function uploadImage(file: File, folder: string = 'gallery'): Promise<UploadResult> {

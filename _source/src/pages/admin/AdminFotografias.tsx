@@ -16,9 +16,9 @@ export const AdminFotografias: React.FC = () => {
     loadAll();
   }, []);
 
-  const handleDeletePhoto = async (photoId: string) => {
-    if (!confirm('¿Seguro que deseas eliminar esta fotografía del repositorio?')) return;
-    await tripService.deletePhoto(photoId);
+  const handleDeletePhoto = async (photoId: string, photoUrl?: string) => {
+    if (!confirm('¿Seguro que deseas eliminar esta fotografía del repositorio y de Backblaze?')) return;
+    await tripService.deletePhoto(photoId, photoUrl);
     loadAll();
   };
 
@@ -82,7 +82,7 @@ export const AdminFotografias: React.FC = () => {
                   <span className="text-slate-300 font-mono truncate">{p.filename}</span>
                   <button
                     type="button"
-                    onClick={() => handleDeletePhoto(p.id)}
+                    onClick={() => handleDeletePhoto(p.id, p.url)}
                     className="p-1 rounded-md bg-rose-500/20 text-rose-400 hover:bg-rose-500 hover:text-white transition-colors"
                     title="Eliminar foto"
                   >
