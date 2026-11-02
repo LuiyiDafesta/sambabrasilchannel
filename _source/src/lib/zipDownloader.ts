@@ -1,5 +1,5 @@
 import JSZip from 'jszip';
-import { getCdnUrl, downloadDirectPhoto } from './storage';
+import { getCdnUrl, downloadDirectPhoto, getDownloadProxyUrl } from './storage';
 import { Fotografia } from '../types';
 
 export interface DownloadProgress {
@@ -26,7 +26,7 @@ export async function downloadPhotosAsZip(
   if (total === 0) return;
 
   const zip = new JSZip();
-  const folder = zip.folder(zipFilename.replace(/\.zip$/i, '')) || zip;
+  let addedCount = 0;
 
   for (let i = 0; i < total; i++) {
     if (abortSignal?.aborted) {
@@ -48,25 +48,53 @@ export async function downloadPhotosAsZip(
 
     try {
       const cdnUrl = getCdnUrl(photo.url);
-      const res = await fetch(cdnUrl, {
-        signal: abortSignal,
-        mode: 'cors',
-      });
+      const proxyUrl = getDownloadProxyUrl(cdnUrl, photo.filename);
+
+      let res: Response | null = null;
+      try {
+        res = await fetch(proxyUrl, { signal: abortSignal });
+      } catch (proxyErr) {
+        console.warn(`[ZIP Downloader] Proxy fetch failed for photo ${photo.id}:`, proxyErr);
+      }
+
+      if (!res || !res.ok) {
+        // Fallback to direct fetch
+        res = await fetch(cdnUrl, { signal: abortSignal, mode: 'cors' });
+      }
 
       if (!res.ok) {
         throw new Error(`HTTP ${res.status}`);
       }
 
       const blob = await res.blob();
-      const safeFilename = photo.filename || `foto-${currentIndex}.jpg`;
-      folder.file(safeFilename, blob);
+      let safeFilename = (photo.filename || `foto-${currentIndex}.jpg`).trim();
+      if (!/\.(jpe?g|png|webp|gif|bmp)$/i.test(safeFilename)) {
+        safeFilename += '.jpg';
+      }
+      safeFilename = safeFilename.replace(/[<>:"/\\|?*]/g, '_');
+
+      // Deduplicate if needed
+      if (zip.file(safeFilename)) {
+        const lastDot = safeFilename.lastIndexOf('.');
+        if (lastDot > 0) {
+          safeFilename = `${safeFilename.substring(0, lastDot)}-${currentIndex}${safeFilename.substring(lastDot)}`;
+        } else {
+          safeFilename = `${safeFilename}-${currentIndex}.jpg`;
+        }
+      }
+
+      zip.file(safeFilename, blob);
+      addedCount++;
     } catch (err: any) {
       if (abortSignal?.aborted) {
         throw new Error('Descarga cancelada por el usuario');
       }
       console.warn(`[ZIP Downloader] Error fetching photo ${photo.id}:`, err);
-      // Fallback: create placeholder or continue so zip doesn't fail completely
     }
+  }
+
+  if (addedCount === 0) {
+    throw new Error('No se pudieron descargar los archivos para generar el ZIP.');
   }
 
   // Compression Phase (85% to 100%)

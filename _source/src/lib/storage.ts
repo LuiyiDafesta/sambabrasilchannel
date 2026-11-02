@@ -58,12 +58,34 @@ export function getCdnUrl(objectKey: string): string {
 }
 
 /**
+ * Helper to get a proxy URL for downloading/fetching remote photos with CORS
+ */
+export function getDownloadProxyUrl(url: string, filename?: string, download: boolean = false): string {
+  const cdnUrl = getCdnUrl(url);
+  // If already a same-origin relative URL or blob/data, return as-is
+  if (cdnUrl.startsWith('/') && !cdnUrl.startsWith('//')) {
+    return cdnUrl;
+  }
+  if (cdnUrl.startsWith('blob:') || cdnUrl.startsWith('data:')) {
+    return cdnUrl;
+  }
+  const params = new URLSearchParams();
+  params.set('url', cdnUrl);
+  if (filename) params.set('filename', filename);
+  if (download) params.set('download', '1');
+  return `/download_photo.php?${params.toString()}`;
+}
+
+/**
  * Downloads a single photo directly without compression
  */
 export async function downloadDirectPhoto(url: string, filename: string): Promise<void> {
   const cdnUrl = getCdnUrl(url);
+  const proxyUrl = getDownloadProxyUrl(cdnUrl, filename, true);
+
   try {
-    const res = await fetch(cdnUrl, { mode: 'cors' });
+    // 1. Fetch via same-origin proxy (avoids cross-origin CORS restriction)
+    const res = await fetch(proxyUrl);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const blob = await res.blob();
     const blobUrl = URL.createObjectURL(blob);
@@ -73,13 +95,13 @@ export async function downloadDirectPhoto(url: string, filename: string): Promis
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    setTimeout(() => URL.revokeObjectURL(blobUrl), 1500);
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 3000);
   } catch (err) {
-    // Direct anchor fallback
+    console.warn('[Direct Download] Proxy fetch error, triggering attachment download:', err);
+    // 2. Direct browser trigger of proxy download endpoint (forces Content-Disposition: attachment)
     const link = document.createElement('a');
-    link.href = cdnUrl;
+    link.href = proxyUrl;
     link.download = filename || 'foto-sambabrasil.jpg';
-    link.target = '_blank';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
