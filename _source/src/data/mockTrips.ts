@@ -1,4 +1,4 @@
-﻿import { Vuelta, AdminStats } from '../types';
+import { Vuelta, AdminStats } from '../types';
 
 export const INITIAL_STATS: AdminStats = {
   vueltas_total: 24,

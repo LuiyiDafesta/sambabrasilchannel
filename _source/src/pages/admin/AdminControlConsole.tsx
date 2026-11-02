@@ -86,7 +86,23 @@ export const AdminControlConsole: React.FC = () => {
   // Gallery Subview: Drag & Drop and sequential upload queue
   const [uploadQueue, setUploadQueue] = useState<UploadQueueItem[]>([]);
   const [isProcessingQueue, setIsProcessingQueue] = useState(false);
+  const [isDraggingOver, setIsDraggingOver] = useState(false);
+  const dragCounterRef = useRef(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Prevent browser default file open on window drop
+  useEffect(() => {
+    const preventDrag = (e: DragEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+    };
+    window.addEventListener('dragover', preventDrag);
+    window.addEventListener('drop', preventDrag);
+    return () => {
+      window.removeEventListener('dragover', preventDrag);
+      window.removeEventListener('drop', preventDrag);
+    };
+  }, []);
 
   // Load Trips
   const loadTrips = async () => {
@@ -240,9 +256,24 @@ export const AdminControlConsole: React.FC = () => {
   // ==========================================
   // SEQUENTIAL QUEUE UPLOAD SYSTEM (Backblaze & Supabase)
   // ==========================================
-  const handleFilesSelected = (files: FileList | null) => {
-    if (!files || files.length === 0) return;
-    const newItems: UploadQueueItem[] = Array.from(files).map((file) => ({
+  const handleFilesSelected = (files: FileList | File[] | null) => {
+    if (!files) return;
+    const filesArray = Array.from(files);
+    if (filesArray.length === 0) return;
+
+    // Filter valid image files (JPG, PNG, WebP, etc.)
+    const validImageFiles = filesArray.filter((file) => {
+      const isImgType = file.type ? file.type.startsWith('image/') : false;
+      const hasImgExt = /\.(jpe?g|png|webp|gif|bmp|heic|avif|tiff)$/i.test(file.name);
+      return isImgType || hasImgExt;
+    });
+
+    if (validImageFiles.length === 0) {
+      alert('Solo se pueden subir archivos de imagen (JPG, PNG, WebP).');
+      return;
+    }
+
+    const newItems: UploadQueueItem[] = validImageFiles.map((file) => ({
       id: `q-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
       file,
       name: file.name,
@@ -251,6 +282,51 @@ export const AdminControlConsole: React.FC = () => {
     }));
 
     setUploadQueue((prev) => [...prev, ...newItems]);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
+  };
+
+  const handleDragEnter = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounterRef.current += 1;
+    if (e.dataTransfer) {
+      e.dataTransfer.dropEffect = 'copy';
+    }
+    setIsDraggingOver(true);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.dataTransfer) {
+      e.dataTransfer.dropEffect = 'copy';
+    }
+    if (!isDraggingOver) {
+      setIsDraggingOver(true);
+    }
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounterRef.current -= 1;
+    if (dragCounterRef.current <= 0) {
+      dragCounterRef.current = 0;
+      setIsDraggingOver(false);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounterRef.current = 0;
+    setIsDraggingOver(false);
+
+    if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      handleFilesSelected(e.dataTransfer.files);
+    }
   };
 
   // Process queue sequentially one by one
@@ -572,23 +648,36 @@ export const AdminControlConsole: React.FC = () => {
 
                   {/* Drag and Drop Container */}
                   <div
-                    onDragOver={(e) => e.preventDefault()}
-                    onDrop={(e) => {
-                      e.preventDefault();
-                      handleFilesSelected(e.dataTransfer.files);
-                    }}
+                    onDragEnter={handleDragEnter}
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onDrop={handleDrop}
                     onClick={() => fileInputRef.current?.click()}
-                    className="border-2 border-dashed border-white/15 hover:border-[#159447]/60 bg-black/20 hover:bg-black/30 rounded-2xl p-8 text-center cursor-pointer transition-all group"
+                    className={`border-2 border-dashed rounded-3xl p-8 sm:p-10 text-center cursor-pointer transition-all duration-200 relative overflow-hidden select-none ${
+                      isDraggingOver
+                        ? 'border-[#159447] bg-[#159447]/20 ring-4 ring-[#159447]/30 scale-[1.01] shadow-[0_0_35px_rgba(21,148,71,0.35)]'
+                        : 'border-white/20 hover:border-[#159447]/60 bg-black/25 hover:bg-black/35 shadow-inner'
+                    }`}
                   >
-                    <div className="w-12 h-12 rounded-full bg-white/5 border border-white/10 group-hover:border-[#159447]/40 flex items-center justify-center mx-auto text-[#159447] mb-3 group-hover:scale-110 transition-transform">
-                      <UploadCloud size={22} />
+                    <div className="pointer-events-none">
+                      <div
+                        className={`w-14 h-14 rounded-2xl border flex items-center justify-center mx-auto mb-3 transition-all ${
+                          isDraggingOver
+                            ? 'bg-[#159447] border-[#159447] text-white scale-110 shadow-[0_0_20px_#159447]'
+                            : 'bg-white/5 border-white/10 text-[#159447]'
+                        }`}
+                      >
+                        <UploadCloud size={26} />
+                      </div>
+                      <h4 className="font-outfit font-black text-sm sm:text-base text-white uppercase tracking-wider mb-1">
+                        {isDraggingOver ? '¡SOLTÁ LAS FOTOS AQUÍ PARA SUBIRLAS!' : 'ARRASTRÁ Y SOLTÁ FOTOS GRUPALES AQUÍ'}
+                      </h4>
+                      <p className="text-xs text-slate-400 max-w-md mx-auto">
+                        {isDraggingOver
+                          ? 'Subida automática a Backblaze B2 y CDN'
+                          : 'O haz clic para seleccionar varios archivos JPG, PNG o WebP desde tu computadora (cola secuencial)'}
+                      </p>
                     </div>
-                    <h4 className="font-outfit font-black text-xs sm:text-sm text-white uppercase tracking-wider mb-1">
-                      ARRASTRÁ Y SOLTÁ FOTOS GRUPALES AQUÍ
-                    </h4>
-                    <p className="text-[11px] text-slate-400">
-                      O HAZ CLIC PARA SELECCIONAR VARIOS ARCHIVOS JPG, PNG O WEBP (PROCESAMIENTO EN COLA SECUENCIAL)
-                    </p>
                   </div>
 
                   {/* Sequential Queue Progress Indicators */}
