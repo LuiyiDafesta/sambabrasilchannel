@@ -69,7 +69,6 @@ export const AdminColegios: React.FC = () => {
                 <th className="pb-4 px-4">Colegio</th>
                 <th className="pb-4 px-4">Vuelta Asignada</th>
                 <th className="pb-4 px-4">Fecha</th>
-                <th className="pb-4 px-4">Pasajeros (Pax)</th>
                 <th className="pb-4 px-4 text-right">Acción</th>
               </tr>
             </thead>
@@ -89,9 +88,6 @@ export const AdminColegios: React.FC = () => {
                   </td>
                   <td className="py-3 px-4 text-slate-400 font-mono">
                     {s.vuelta_date}
-                  </td>
-                  <td className="py-3 px-4 text-slate-200 font-mono font-bold">
-                    {s.pax_count} pax
                   </td>
                   <td className="py-3 px-4 text-right">
                     <Link

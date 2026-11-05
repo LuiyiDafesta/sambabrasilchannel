@@ -29,7 +29,6 @@ export const AdminVueltaDetail: React.FC = () => {
   const [showSchoolModal, setShowSchoolModal] = useState(false);
   const [contractCode, setContractCode] = useState('CT-1024');
   const [schoolName, setSchoolName] = useState('');
-  const [paxCount, setPaxCount] = useState(50);
   const [city, setCity] = useState('');
 
   // Photos Uploader State
@@ -55,7 +54,7 @@ export const AdminVueltaDetail: React.FC = () => {
     await tripService.addSchool(trip.id, {
       contract_code: contractCode,
       name: schoolName,
-      pax_count: Number(paxCount),
+      pax_count: 0,
       city,
     });
     setShowSchoolModal(false);
@@ -137,7 +136,6 @@ export const AdminVueltaDetail: React.FC = () => {
     );
   }
 
-  const totalPax = trip.schools.reduce((acc, s) => acc + s.pax_count, 0);
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto">
@@ -283,7 +281,6 @@ export const AdminVueltaDetail: React.FC = () => {
                   <th className="pb-3 px-4">Contrato</th>
                   <th className="pb-3 px-4">Colegio</th>
                   <th className="pb-3 px-4">Ciudad</th>
-                  <th className="pb-3 px-4">Pax</th>
                   <th className="pb-3 px-4 text-right">Acciones</th>
                 </tr>
               </thead>
@@ -299,9 +296,6 @@ export const AdminVueltaDetail: React.FC = () => {
                     <td className="py-3 px-4 text-slate-400">
                       {sch.city || 'Argentina'}
                     </td>
-                    <td className="py-3 px-4 text-slate-200 font-mono font-bold">
-                      {sch.pax_count}
-                    </td>
                     <td className="py-3 px-4 text-right space-x-2">
                       <button
                         onClick={() => handleRemoveSchool(sch.id)}
@@ -315,14 +309,6 @@ export const AdminVueltaDetail: React.FC = () => {
                 ))}
               </tbody>
             </table>
-          </div>
-
-          {/* Total summary row */}
-          <div className="mt-6 pt-4 border-t border-white/10 flex items-center justify-between text-xs font-bold text-slate-300 px-4">
-            <span>Total de pasajeros del viaje:</span>
-            <span className="text-white font-mono text-sm bg-white/5 px-3 py-1 rounded-lg">
-              {totalPax} pax
-            </span>
           </div>
         </div>
       )}
@@ -470,18 +456,6 @@ export const AdminVueltaDetail: React.FC = () => {
                   placeholder="Ej. Colegio Nacional"
                   value={schoolName}
                   onChange={(e) => setSchoolName(e.target.value)}
-                  className="w-full bg-[#121D32] border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-[#159447]"
-                />
-              </div>
-
-              <div>
-                <label className="block text-slate-300 font-semibold mb-1">Cantidad de Pasajeros (Pax)</label>
-                <input
-                  type="number"
-                  min="1"
-                  required
-                  value={paxCount}
-                  onChange={(e) => setPaxCount(Number(e.target.value))}
                   className="w-full bg-[#121D32] border border-white/10 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-[#159447]"
                 />
               </div>

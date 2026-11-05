@@ -126,7 +126,6 @@ export const AdminVueltas: React.FC = () => {
                 <th className="pb-4 px-4">Transporte</th>
                 <th className="pb-4 px-4">Coordinador</th>
                 <th className="pb-4 px-4">Colegios</th>
-                <th className="pb-4 px-4">Pax</th>
                 <th className="pb-4 px-4">Estado</th>
                 <th className="pb-4 px-4 text-right">Acciones</th>
               </tr>
@@ -158,9 +157,6 @@ export const AdminVueltas: React.FC = () => {
                   </td>
                   <td className="py-4 px-4 text-slate-300 font-mono">
                     {t.schools.length}
-                  </td>
-                  <td className="py-4 px-4 text-slate-300 font-mono">
-                    {t.total_pax || t.schools.reduce((a, s) => a + s.pax_count, 0)}
                   </td>
                   <td className="py-4 px-4">
                     <span

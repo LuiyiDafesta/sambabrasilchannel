@@ -46,7 +46,6 @@ export const AdminDashboard: React.FC = () => {
   const statCards = [
     { label: 'Vueltas Registradas', value: stats.vueltas_total, icon: Compass, color: 'text-[#159447]', bg: 'bg-[#159447]/10' },
     { label: 'Colegios Participantes', value: stats.colegios_total, icon: GraduationCap, color: 'text-[#F8C62B]', bg: 'bg-[#F8C62B]/10' },
-    { label: 'Total Pasajeros (Pax)', value: stats.pax_total.toLocaleString(), icon: Users, color: 'text-sky-400', bg: 'bg-sky-400/10' },
     { label: 'Fotos Publicadas', value: stats.fotos_total.toLocaleString(), icon: Camera, color: 'text-purple-400', bg: 'bg-purple-400/10' },
     { label: 'Visitas a Galerías', value: stats.visitas_total.toLocaleString(), icon: Eye, color: 'text-cyan-400', bg: 'bg-cyan-400/10' },
     { label: 'Descargas Realizadas', value: stats.descargas_total.toLocaleString(), icon: Download, color: 'text-emerald-400', bg: 'bg-emerald-400/10' },
@@ -128,7 +127,6 @@ export const AdminDashboard: React.FC = () => {
                 <th className="pb-3 px-3">Transporte</th>
                 <th className="pb-3 px-3">Coordinador</th>
                 <th className="pb-3 px-3">Colegios</th>
-                <th className="pb-3 px-3">Pax</th>
                 <th className="pb-3 px-3">Estado</th>
                 <th className="pb-3 px-3 text-right">Acción</th>
               </tr>
@@ -160,9 +158,6 @@ export const AdminDashboard: React.FC = () => {
                   </td>
                   <td className="py-3 px-3 text-slate-300">
                     {t.schools.length} colegios
-                  </td>
-                  <td className="py-3 px-3 text-slate-300 font-mono">
-                    {t.total_pax || t.schools.reduce((a, s) => a + s.pax_count, 0)}
                   </td>
                   <td className="py-3 px-3">
                     <span

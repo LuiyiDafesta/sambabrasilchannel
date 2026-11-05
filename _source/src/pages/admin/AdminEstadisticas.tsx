@@ -61,7 +61,7 @@ export const AdminEstadisticas: React.FC = () => {
           <div>
             <div className="flex justify-between text-slate-300 font-semibold mb-1">
               <span>Rio de Janeiro & Arraial do Cabo</span>
-              <span className="font-mono">68% de pasajeros (1,930 pax)</span>
+              <span className="font-mono">68% de grupos</span>
             </div>
             <div className="w-full h-2.5 bg-white/5 rounded-full overflow-hidden">
               <div className="h-full bg-[#159447] rounded-full" style={{ width: '68%' }} />
@@ -71,7 +71,7 @@ export const AdminEstadisticas: React.FC = () => {
           <div>
             <div className="flex justify-between text-slate-300 font-semibold mb-1">
               <span>Búzios & Cabo Frío</span>
-              <span className="font-mono">32% de pasajeros (910 pax)</span>
+              <span className="font-mono">32% de grupos</span>
             </div>
             <div className="w-full h-2.5 bg-white/5 rounded-full overflow-hidden">
               <div className="h-full bg-[#F8C62B] rounded-full" style={{ width: '32%' }} />
