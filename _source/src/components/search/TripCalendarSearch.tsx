@@ -391,13 +391,10 @@ export const TripCalendarSearch: React.FC<TripCalendarSearchProps> = ({
                           {trip.schools.map((sch) => (
                             <div
                               key={sch.id}
-                              className="bg-[#121D32] border border-white/10 rounded-xl p-3 flex items-center justify-between group-hover:border-[#159447]/50 transition-colors"
+                              className="bg-[#121D32] border border-white/10 rounded-xl p-3 flex items-center group-hover:border-[#159447]/50 transition-colors"
                             >
-                              <span className="font-bold text-white text-xs sm:text-sm">
+                              <span className="font-bold text-white text-xs sm:text-sm truncate">
                                 {sch.name}
-                              </span>
-                              <span className="text-[10px] text-slate-400 font-mono">
-                                {sch.pax_count} pax
                               </span>
                             </div>
                           ))}

@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import {
   BarChart3,
   TrendingUp,
-  Users,
   Camera,
   HardDrive,
   Star,
@@ -17,8 +16,6 @@ import {
   Activity,
   Layers,
   Sparkles,
-  ArrowUpRight,
-  Download,
 } from 'lucide-react';
 import { tripService } from '../../services/tripService';
 import { surveyService, SurveyResponse } from '../../services/surveyService';
@@ -55,7 +52,7 @@ export const AdminMetricsTab: React.FC = () => {
   }, []);
 
   // ==========================================
-  // METRICS CALCULATIONS
+  // METRICS CALCULATIONS (SIN MEDICIÓN DE PAX)
   // ==========================================
   const totalTrips = trips.length;
   const publishedTrips = trips.filter((t) => t.status === 'publicada').length;
@@ -70,7 +67,6 @@ export const AdminMetricsTab: React.FC = () => {
   });
 
   const totalSchools = allSchools.length;
-  const totalPax = allSchools.reduce((acc, s) => acc + (Number(s.pax_count) || 0), 0);
 
   // Flatten photos & storage calculation
   const allPhotos: (Fotografia & { tripCode: string })[] = [];
@@ -118,23 +114,22 @@ export const AdminMetricsTab: React.FC = () => {
     ? Math.round((Number(avgSatisfaction) / 10) * 100)
     : 94;
 
-  // Breakdown by destination
-  const destinationMap: { [dest: string]: { pax: number; trips: number } } = {};
+  // Breakdown by destination (calculated by trips and schools)
+  const destinationMap: { [dest: string]: { trips: number; schools: number } } = {};
   trips.forEach((t) => {
     const dest = t.destination || 'Camboriú';
     if (!destinationMap[dest]) {
-      destinationMap[dest] = { pax: 0, trips: 0 };
+      destinationMap[dest] = { trips: 0, schools: 0 };
     }
     destinationMap[dest].trips += 1;
-    const tripPax = (t.schools || []).reduce((acc, s) => acc + (Number(s.pax_count) || 0), 0);
-    destinationMap[dest].pax += tripPax;
+    destinationMap[dest].schools += (t.schools || []).length;
   });
 
   const destinationStats = Object.entries(destinationMap).map(([dest, data]) => ({
     destination: dest,
     trips: data.trips,
-    pax: data.pax,
-    percent: totalPax > 0 ? Math.round((data.pax / totalPax) * 100) : (data.trips > 0 ? 100 : 0),
+    schools: data.schools,
+    percent: totalTrips > 0 ? Math.round((data.trips / totalTrips) * 100) : 0,
   }));
 
   // Breakdown by month
@@ -150,10 +145,8 @@ export const AdminMetricsTab: React.FC = () => {
     else if (t.date.startsWith('2027-01')) monthMap['Enero 2027'] += 1;
   });
 
-  // Top Schools by pax
-  const topSchools = [...allSchools]
-    .sort((a, b) => (Number(b.pax_count) || 0) - (Number(a.pax_count) || 0))
-    .slice(0, 5);
+  // Top/Recent Schools
+  const recentSchools = [...allSchools].slice(0, 6);
 
   // Recent Feedback Reviews
   const recentReviews = responses.slice(0, 4);
@@ -267,30 +260,11 @@ export const AdminMetricsTab: React.FC = () => {
             {totalSchools}
           </div>
           <div className="text-[11px] text-slate-400">
-            Instituciones educativas con código de contrato activo
+            Instituciones educativas participantes en los grupos
           </div>
         </div>
 
-        {/* KPI 3: Pasajeros Totales (Pax) */}
-        <div className="bg-[#0C1424] border border-white/10 rounded-3xl p-6 relative overflow-hidden group hover:border-[#F8C62B]/50 transition-all shadow-lg">
-          <div className="absolute top-0 right-0 w-28 h-28 bg-[#F8C62B]/10 rounded-full blur-2xl pointer-events-none" />
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-              Total Pasajeros (Pax)
-            </span>
-            <div className="w-10 h-10 rounded-xl bg-[#F8C62B]/15 border border-[#F8C62B]/30 text-[#F8C62B] flex items-center justify-center">
-              <Users size={18} />
-            </div>
-          </div>
-          <div className="font-outfit font-black text-3xl sm:text-4xl text-white mb-2 tracking-tight">
-            {totalPax > 0 ? totalPax.toLocaleString() : '—'}
-          </div>
-          <div className="text-[11px] text-slate-400">
-            Alumnos y coordinadores registrados en las listas
-          </div>
-        </div>
-
-        {/* KPI 4: Fotografías HD */}
+        {/* KPI 3: Fotografías HD */}
         <div className="bg-[#0C1424] border border-white/10 rounded-3xl p-6 relative overflow-hidden group hover:border-[#159447]/50 transition-all shadow-lg">
           <div className="absolute top-0 right-0 w-28 h-28 bg-[#159447]/10 rounded-full blur-2xl pointer-events-none" />
           <div className="flex items-center justify-between mb-3">
@@ -308,25 +282,44 @@ export const AdminMetricsTab: React.FC = () => {
             <span>Almacenamiento: {formatBytes(totalBytes)}</span>
           </div>
         </div>
+
+        {/* KPI 4: Almacenamiento Backblaze */}
+        <div className="bg-[#0C1424] border border-white/10 rounded-3xl p-6 relative overflow-hidden group hover:border-[#F8C62B]/50 transition-all shadow-lg">
+          <div className="absolute top-0 right-0 w-28 h-28 bg-[#F8C62B]/10 rounded-full blur-2xl pointer-events-none" />
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+              Espacio Backblaze B2
+            </span>
+            <div className="w-10 h-10 rounded-xl bg-[#F8C62B]/15 border border-[#F8C62B]/30 text-[#F8C62B] flex items-center justify-center">
+              <HardDrive size={18} />
+            </div>
+          </div>
+          <div className="font-outfit font-black text-3xl sm:text-4xl text-white mb-2 tracking-tight">
+            {formatBytes(totalBytes)}
+          </div>
+          <div className="text-[11px] text-slate-400">
+            Bucket: <strong className="text-slate-300 font-mono">SambaBrasil</strong> (Cloudflare CDN)
+          </div>
+        </div>
       </div>
 
       {/* 4. Secondary KPI Cards (Engagement, CRM, CSAT, DreamsCDA) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* KPI 5: Almacenamiento Backblaze */}
+        {/* KPI 5: Promedio por Foto */}
         <div className="bg-[#09101C] border border-white/5 rounded-2xl p-5 space-y-2">
           <div className="flex items-center justify-between text-slate-400 text-xs">
             <span className="flex items-center gap-1.5 font-bold uppercase text-[10px] tracking-wider text-slate-400">
-              <HardDrive size={14} className="text-[#124DA0]" /> B2 Bucket Size
+              <Camera size={14} className="text-[#124DA0]" /> Resolución Promedio
             </span>
             <span className="font-mono text-[10px] text-sky-400 bg-sky-950/60 px-2 py-0.5 rounded border border-sky-800/40">
-              SambaBrasil
+              HD
             </span>
           </div>
           <div className="font-outfit font-black text-2xl text-white">
-            {formatBytes(totalBytes)}
+            {avgPhotoSize}
           </div>
           <p className="text-[11px] text-slate-400">
-            Promedio: <strong className="text-slate-300 font-mono">{avgPhotoSize}</strong> por foto
+            Promedio: <strong className="text-slate-300 font-mono">{avgPhotosPerTrip}</strong> fotos por grupo
           </p>
         </div>
 
@@ -401,7 +394,7 @@ export const AdminMetricsTab: React.FC = () => {
                 Distribución por Destino
               </h3>
               <p className="text-xs text-slate-400">
-                Porcentaje de pasajeros y grupos según lugar de estadía.
+                Cantidad de grupos y colegios según lugar de estadía.
               </p>
             </div>
             <span className="text-xs font-mono font-bold text-[#159447] bg-[#159447]/10 px-2.5 py-1 rounded-lg border border-[#159447]/30">
@@ -421,7 +414,7 @@ export const AdminMetricsTab: React.FC = () => {
                         {d.destination}
                       </span>
                       <span className="font-mono text-slate-400">
-                        {d.pax > 0 ? `${d.pax.toLocaleString()} pax` : `${d.trips} grupos`} ({d.percent}%)
+                        {d.trips} grupo{d.trips !== 1 ? 's' : ''} ({d.schools} colegio{d.schools !== 1 ? 's' : ''}) • {d.percent}%
                       </span>
                     </div>
                     <div className="w-full h-2.5 bg-white/5 rounded-full overflow-hidden">
@@ -480,20 +473,20 @@ export const AdminMetricsTab: React.FC = () => {
         </div>
       </div>
 
-      {/* 6. Top Colegios & Opiniones Recientes (Two Columns) */}
+      {/* 6. Colegios Participantes & Opiniones Recientes (Two Columns) */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Top Colegios */}
+        {/* Colegios Participantes */}
         <div className="bg-[#0C1424] border border-white/10 rounded-3xl p-6 sm:p-8 space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="font-outfit font-black text-lg text-white uppercase tracking-wide">
-              Colegios con Mayor Concurrencia
+              Colegios Participantes Registrados
             </h3>
-            <span className="text-xs text-slate-500 font-mono">Top 5</span>
+            <span className="text-xs text-slate-500 font-mono">Últimos</span>
           </div>
 
-          {topSchools.length > 0 ? (
+          {recentSchools.length > 0 ? (
             <div className="divide-y divide-white/5">
-              {topSchools.map((school, idx) => (
+              {recentSchools.map((school, idx) => (
                 <div key={school.id || idx} className="py-3 flex items-center justify-between gap-3 text-xs">
                   <div className="flex items-center gap-3 min-w-0">
                     <span className="w-6 h-6 rounded-lg bg-white/5 text-slate-400 flex items-center justify-center font-mono font-bold text-[11px] shrink-0">
@@ -504,13 +497,13 @@ export const AdminMetricsTab: React.FC = () => {
                         {school.name}
                       </span>
                       <span className="text-slate-400 text-[10px] block truncate">
-                        {school.contract_code} • {school.destination} (Grupo {school.tripCode})
+                        {school.destination} • Grupo {school.tripCode}
                       </span>
                     </div>
                   </div>
                   <div className="text-right shrink-0">
-                    <span className="font-outfit font-black text-sm text-[#159447] block">
-                      {school.pax_count} PAX
+                    <span className="font-outfit font-bold text-xs text-[#159447] bg-[#159447]/15 border border-[#159447]/30 px-2.5 py-0.5 rounded-full block">
+                      {school.tripCode}
                     </span>
                   </div>
                 </div>
@@ -518,7 +511,7 @@ export const AdminMetricsTab: React.FC = () => {
             </div>
           ) : (
             <div className="text-center py-8 text-slate-500 text-xs">
-              No hay colegios con pasajeros cargados actualmente.
+              No hay colegios cargados actualmente en los grupos.
             </div>
           )}
         </div>
