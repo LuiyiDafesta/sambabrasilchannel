@@ -818,8 +818,8 @@ export const AdminControlConsole: React.FC = () => {
                             <span
                               className={`px-1.5 py-0.5 rounded text-[9px] font-black uppercase ${
                                 item.targetCategory === 'grupal'
-                                  ? 'bg-[#F8C62B]/20 text-[#F8C62B] border border-[#F8C62B]/30'
-                                  : 'bg-[#159447]/20 text-[#159447] border border-[#159447]/30'
+                                  ? 'bg-[#159447]/25 text-[#159447] border border-[#159447]/40'
+                                  : 'bg-sky-500/20 text-sky-400 border border-sky-500/30'
                               }`}
                             >
                               {item.targetCategory === 'grupal' ? 'Grupal' : 'Viaje'}
@@ -845,7 +845,7 @@ export const AdminControlConsole: React.FC = () => {
                                 <button
                                   type="button"
                                   onClick={() => handleRetrySingleUpload(item.id)}
-                                  className="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-[#F8C62B] hover:text-black text-slate-200 text-[10px] font-bold flex items-center gap-1 transition-colors cursor-pointer"
+                                  className="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-[#159447] hover:text-white text-slate-200 text-[10px] font-bold flex items-center gap-1 transition-colors cursor-pointer"
                                   title="Reintentar esta fotografía"
                                 >
                                   <RotateCw size={11} />
@@ -867,12 +867,12 @@ export const AdminControlConsole: React.FC = () => {
                   {/* Header row */}
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/5">
                     <div>
-                      <div className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-[#F8C62B] mb-1">
+                      <div className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-[#159447] mb-1">
                         <span>✦</span>
                         <span>NIVEL DE GRUPO</span>
                       </div>
                       <h3 className="font-outfit font-black text-lg sm:text-xl text-white uppercase flex items-center gap-2">
-                        <ImageIcon size={18} className="text-[#F8C62B]" />
+                        <ImageIcon size={18} className="text-[#159447]" />
                         <span>GALERÍA DE FOTOS GRUPALES ({grupalPhotos.length})</span>
                       </h3>
                       <p className="text-xs text-slate-400 mt-0.5">
@@ -892,7 +892,7 @@ export const AdminControlConsole: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => fileInputGrupalRef.current?.click()}
-                        className="bg-[#F8C62B] hover:bg-[#e0b024] text-black font-outfit font-black text-xs uppercase px-4 py-2.5 rounded-xl shadow-[0_0_15px_rgba(248,198,43,0.3)] flex items-center gap-2 cursor-pointer transition-all"
+                        className="bg-[#159447] hover:bg-[#117739] text-white font-outfit font-black text-xs uppercase px-4 py-2.5 rounded-xl shadow-[0_0_15px_rgba(21,148,71,0.3)] flex items-center gap-2 cursor-pointer transition-all"
                       >
                         <UploadCloud size={15} />
                         <span>SUBIR FOTOS GRUPALES HD</span>
@@ -909,16 +909,16 @@ export const AdminControlConsole: React.FC = () => {
                     onClick={() => fileInputGrupalRef.current?.click()}
                     className={`border-2 border-dashed rounded-3xl p-8 sm:p-10 text-center cursor-pointer transition-all duration-200 relative overflow-hidden select-none ${
                       isDraggingGrupal
-                        ? 'border-[#F8C62B] bg-[#F8C62B]/20 ring-4 ring-[#F8C62B]/30 scale-[1.01] shadow-[0_0_35px_rgba(248,198,43,0.35)]'
-                        : 'border-white/20 hover:border-[#F8C62B]/60 bg-black/25 hover:bg-black/35 shadow-inner'
+                        ? 'border-[#159447] bg-[#159447]/20 ring-4 ring-[#159447]/30 scale-[1.01] shadow-[0_0_35px_rgba(21,148,71,0.35)]'
+                        : 'border-white/20 hover:border-[#159447]/60 bg-black/25 hover:bg-black/35 shadow-inner'
                     }`}
                   >
                     <div className="pointer-events-none">
                       <div
                         className={`w-14 h-14 rounded-2xl border flex items-center justify-center mx-auto mb-3 transition-all ${
                           isDraggingGrupal
-                            ? 'bg-[#F8C62B] border-[#F8C62B] text-black scale-110 shadow-[0_0_20px_#F8C62B]'
-                            : 'bg-white/5 border-white/10 text-[#F8C62B]'
+                            ? 'bg-[#159447] border-[#159447] text-white scale-110 shadow-[0_0_20px_#159447]'
+                            : 'bg-white/5 border-white/10 text-[#159447]'
                         }`}
                       >
                         <UploadCloud size={26} />
