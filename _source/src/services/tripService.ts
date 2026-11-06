@@ -1,5 +1,5 @@
 import { supabase } from '../lib/supabase';
-import { deleteImage } from '../lib/storage';
+import { deleteImage, deleteImages } from '../lib/storage';
 import { Vuelta, AdminStats, Colegio, Fotografia } from '../types';
 import { MOCK_TRIPS, INITIAL_STATS } from '../data/mockTrips';
 
@@ -467,6 +467,42 @@ export const tripService = {
 
     localTrips.forEach((t) => {
       t.photos = t.photos.filter((p) => p.id !== photoId);
+      t.photo_count = t.photos.length;
+    });
+    return true;
+  },
+
+  /**
+   * Delete multiple photos in bulk (purges physical files from Backblaze B2 and deletes Supabase records)
+   */
+  async deletePhotos(photos: Array<{ id: string; url?: string }>): Promise<boolean> {
+    if (!photos || photos.length === 0) return true;
+    try {
+      const ids = photos.map((p) => p.id);
+      let urls = photos.map((p) => p.url).filter((u): u is string => !!u);
+
+      if (urls.length < photos.length) {
+        const { data } = await supabase.from('photos').select('id, url').in('id', ids);
+        if (data) {
+          urls = data.map((p) => p.url).filter(Boolean);
+        }
+      }
+
+      if (urls.length > 0) {
+        await deleteImages(urls);
+      }
+
+      const { error } = await supabase.from('photos').delete().in('id', ids);
+      if (error) {
+        console.error('[TripService] Error deleting photos in bulk from Supabase:', error.message);
+      }
+    } catch (err) {
+      console.warn('[TripService] Bulk delete photos fallback:', err);
+    }
+
+    const idsSet = new Set(photos.map((p) => p.id));
+    localTrips.forEach((t) => {
+      t.photos = (t.photos || []).filter((p) => !idsSet.has(p.id));
       t.photo_count = t.photos.length;
     });
     return true;

@@ -23,27 +23,44 @@ import { DownloadModal } from './DownloadModal';
 import { DownloadProgressBar } from './DownloadProgressBar';
 
 interface FlexibleGalleryProps {
+  id?: string;
+  badge?: string;
+  badgeIcon?: React.ReactNode;
+  title?: string;
+  description?: string;
   photos: Fotografia[];
   schools: Colegio[];
   tripCode: string;
   tripDate: string;
+  defaultColumns?: 2 | 3 | 4 | 5;
+  pageSize?: number;
+  isGrupalSection?: boolean;
+  emptyMessage?: string;
 }
 
 export const FlexibleGallery: React.FC<FlexibleGalleryProps> = ({
+  id = 'galeria-flexible',
+  badge = 'GALERÍA GENERAL',
+  badgeIcon,
+  title,
+  description,
   photos,
   schools,
   tripCode,
   tripDate,
+  defaultColumns = 4,
+  pageSize = 24,
+  isGrupalSection = false,
+  emptyMessage,
 }) => {
   // Columns state: 2, 3, 4, 5
-  const [columnCount, setColumnCount] = useState<2 | 3 | 4 | 5>(4);
+  const [columnCount, setColumnCount] = useState<2 | 3 | 4 | 5>(defaultColumns);
 
   // Selection mode & selected IDs (persists across pages)
   const [isSelectionMode, setIsSelectionMode] = useState(false);
   const [selectedPhotoIds, setSelectedPhotoIds] = useState<Set<string>>(new Set());
 
   // Pagination
-  const pageSize = 24;
   const [currentPage, setCurrentPage] = useState(1);
   const totalPages = Math.max(1, Math.ceil(photos.length / pageSize));
   const validCurrentPage = Math.min(currentPage, totalPages);
@@ -228,22 +245,22 @@ export const FlexibleGallery: React.FC<FlexibleGalleryProps> = ({
   };
 
   return (
-    <div id="galeria-flexible" ref={galleryRef} className="space-y-6 pt-4">
+    <div id={id} ref={galleryRef} className="space-y-6 pt-4">
       {/* ============================================================ */}
-      {/* 1. HEADER SECTION (Image 1) */}
+      {/* 1. HEADER SECTION */}
       {/* ============================================================ */}
       <div>
         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#159447]/15 border border-[#159447]/30 text-[#159447] text-[11px] font-bold uppercase tracking-wider mb-2">
-          <Sparkles size={13} />
-          <span>GALERÍA FLEXIBLE</span>
+          {badgeIcon || <Sparkles size={13} />}
+          <span>{badge}</span>
         </div>
 
         <h2 className="font-outfit font-black text-2xl sm:text-3xl text-white uppercase tracking-tight flex items-center gap-2">
-          <span>GALERÍA COMPLETA DE FOTOS ({photos.length})</span>
+          <span>{title || `GALERÍA COMPLETA DE FOTOS (${photos.length})`}</span>
         </h2>
 
         <p className="text-xs sm:text-sm text-slate-400 mt-1 max-w-3xl">
-          Fotos exclusivas de las excursiones, fiestas y actividades compartidas por todos los chicos.
+          {description || 'Fotos exclusivas de las excursiones, fiestas y actividades compartidas por todos los chicos.'}
         </p>
       </div>
 
@@ -491,9 +508,9 @@ export const FlexibleGallery: React.FC<FlexibleGalleryProps> = ({
                 </button>
 
                 {/* Top-Right Photo Number Pill */}
-                <div className="absolute top-2.5 right-2.5 z-10 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
-                  <span className="bg-black/75 backdrop-blur-md text-white text-[10px] font-mono font-bold px-2 py-0.5 rounded-md border border-white/10">
-                    #{photoNumber}
+                <div className={`absolute top-2.5 right-2.5 z-10 pointer-events-none ${isGrupalSection ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'} transition-opacity`}>
+                  <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-md border ${isGrupalSection ? 'bg-[#159447]/90 text-white border-[#159447]' : 'bg-black/75 backdrop-blur-md text-white border-white/10'}`}>
+                    {isGrupalSection ? `FOTO GRUPAL #${photoNumber}` : `#${photoNumber}`}
                   </span>
                 </div>
 
@@ -533,9 +550,11 @@ export const FlexibleGallery: React.FC<FlexibleGalleryProps> = ({
           })}
         </div>
       ) : (
-        <div className="text-center py-20 bg-[#0C1424] rounded-3xl border border-white/10">
+        <div className="text-center py-16 bg-[#0C1424] rounded-3xl border border-white/10">
           <Camera size={36} className="text-slate-500 mx-auto mb-3" />
-          <h3 className="text-lg font-bold text-white mb-1">No hay fotos publicadas en este álbum todavía</h3>
+          <h3 className="text-base font-bold text-white mb-1">
+            {emptyMessage || 'No hay fotos publicadas en esta sección todavía'}
+          </h3>
           <p className="text-xs text-slate-400">Las fotos estarán disponibles en las próximas horas.</p>
         </div>
       )}

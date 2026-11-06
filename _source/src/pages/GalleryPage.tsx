@@ -129,6 +129,13 @@ export const GalleryPage: React.FC = () => {
       ? trip.schools.map((s) => s.name).join(', ')
       : trip.code;
 
+  // Separate Photos into Grupal and General/Viaje
+  const allPhotos = trip.photos || [];
+  const grupalPhotos = allPhotos.filter((p) => p.category === 'grupal');
+  const generalPhotos = allPhotos.filter(
+    (p) => p.category === 'general' || p.category === 'momentos' || p.category === 'destino' || p.category === 'carnaval' || (!p.category && p.category !== 'grupal')
+  );
+
   const handleShare = async () => {
     const shareData = {
       title: `Fotos de Viaje - Samba Brasil Channel`,
@@ -251,7 +258,54 @@ export const GalleryPage: React.FC = () => {
             </div>
 
             {/* ============================================================ */}
-            {/* PASSENGER SATISFACTION SURVEY BANNER (Only if active survey) */}
+            {/* 2. SECCIÓN FOTOS GRUPALES HD (Image 1 reference) */}
+            {/* ============================================================ */}
+            <FlexibleGallery
+              id="galeria-grupales"
+              badge="NIVEL DE GRUPO"
+              badgeIcon={<Users size={13} className="text-[#F8C62B]" />}
+              title={`FOTOS GRUPALES OFICIALES (${grupalPhotos.length})`}
+              description="Fotos grupales oficiales en alta definición. Los egresados pueden descargarlas en máxima resolución."
+              photos={grupalPhotos}
+              schools={trip.schools || []}
+              tripCode={trip.code}
+              tripDate={trip.date}
+              defaultColumns={3}
+              pageSize={12}
+              isGrupalSection={true}
+              emptyMessage="Aún no se han subido fotos grupales oficiales para este grupo."
+            />
+
+            {/* ============================================================ */}
+            {/* 3. DREAMSCDA PROMOTIONAL BLOCK (Controlled by Admin switch) */}
+            {/* ============================================================ */}
+            {dreamscdaEnabled && (
+              <div className="bg-gradient-to-r from-[#0C1524] to-[#12213A] border border-[#159447]/30 rounded-3xl p-8 sm:p-10 text-center relative overflow-hidden shadow-2xl">
+                <div className="max-w-2xl mx-auto">
+                  <span className="text-[11px] font-bold uppercase tracking-widest text-[#159447] bg-[#159447]/15 px-3 py-1 rounded-full border border-[#159447]/30">
+                    Fotos Profesionales HD
+                  </span>
+                  <h2 className="font-outfit font-black text-2xl sm:text-3xl text-white mt-3 mb-2">
+                    ¿Querés descubrir más recuerdos de tu viaje?
+                  </h2>
+                  <p className="text-slate-300 text-xs sm:text-sm mb-6 leading-relaxed">
+                    Encontrá las fotos profesionales, retratos individuales y panorámicas exclusivas en DreamsCDA.
+                  </p>
+                  <a
+                    href="https://dreamscda.com.ar/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 bg-[#159447] hover:bg-[#117739] text-white font-outfit font-black text-xs sm:text-sm uppercase tracking-wider px-8 py-3.5 rounded-xl shadow-lg shadow-[#159447]/30 transition-all cursor-pointer"
+                  >
+                    <span>VER FOTOS PROFESIONALES</span>
+                    <ExternalLink size={16} />
+                  </a>
+                </div>
+              </div>
+            )}
+
+            {/* ============================================================ */}
+            {/* 4. PASSENGER SATISFACTION SURVEY BANNER (Only if active survey) */}
             {/* ============================================================ */}
             {activeSurvey && (
               <div className="bg-[#0C1524] border border-[#159447]/50 rounded-3xl p-6 sm:p-8 flex flex-col md:flex-row items-center justify-between gap-6 shadow-[0_0_30px_rgba(21,148,71,0.15)] relative overflow-hidden group">
@@ -283,41 +337,21 @@ export const GalleryPage: React.FC = () => {
             )}
 
             {/* ============================================================ */}
-            {/* DREAMSCDA PROMOTIONAL BLOCK (Controlled by Admin switch) */}
-            {/* ============================================================ */}
-            {dreamscdaEnabled && (
-              <div className="bg-gradient-to-r from-[#0C1524] to-[#12213A] border border-[#159447]/30 rounded-3xl p-8 sm:p-10 text-center relative overflow-hidden shadow-2xl">
-                <div className="max-w-2xl mx-auto">
-                  <span className="text-[11px] font-bold uppercase tracking-widest text-[#159447] bg-[#159447]/15 px-3 py-1 rounded-full border border-[#159447]/30">
-                    Fotos Profesionales HD
-                  </span>
-                  <h2 className="font-outfit font-black text-2xl sm:text-3xl text-white mt-3 mb-2">
-                    ¿Querés descubrir más recuerdos de tu viaje?
-                  </h2>
-                  <p className="text-slate-300 text-xs sm:text-sm mb-6 leading-relaxed">
-                    Encontrá las fotos profesionales, retratos individuales y panorámicas exclusivas en DreamsCDA.
-                  </p>
-                  <a
-                    href="https://dreamscda.com.ar/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 bg-[#159447] hover:bg-[#117739] text-white font-outfit font-black text-xs sm:text-sm uppercase tracking-wider px-8 py-3.5 rounded-xl shadow-lg shadow-[#159447]/30 transition-all cursor-pointer"
-                  >
-                    <span>VER FOTOS PROFESIONALES</span>
-                    <ExternalLink size={16} />
-                  </a>
-                </div>
-              </div>
-            )}
-
-            {/* ============================================================ */}
-            {/* 4. FLEXIBLE GALLERY (Image 1, 2, 3) */}
+            {/* 5. SECCIÓN GALERÍA DE FOTOS DEL VIAJE (FOTOS COMUNES) (Image 2 reference) */}
             {/* ============================================================ */}
             <FlexibleGallery
-              photos={trip.photos || []}
+              id="galeria-viaje"
+              badge="GALERÍA GENERAL"
+              badgeIcon={<Camera size={13} className="text-[#159447]" />}
+              title={`GALERÍA DE FOTOS DEL VIAJE (${generalPhotos.length})`}
+              description="Fotos comunes de excursiones, fiestas y actividades compartidas por todos los chicos del grupo."
+              photos={generalPhotos}
               schools={trip.schools || []}
               tripCode={trip.code}
               tripDate={trip.date}
+              defaultColumns={4}
+              pageSize={24}
+              emptyMessage="No hay fotos comunes publicadas en este álbum todavía."
             />
 
           </div>

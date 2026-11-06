@@ -32,7 +32,7 @@ export interface Fotografia {
   vuelta_id: string;
   url: string;
   thumbnail_url?: string;
-  category: 'momentos' | 'destino' | 'carnaval';
+  category: 'grupal' | 'general' | 'momentos' | 'destino' | 'carnaval';
   filename: string;
   file_size?: number;
   created_at: string;

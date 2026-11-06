@@ -5,6 +5,7 @@ import {
   Search,
   Copy,
   Check,
+  CheckSquare,
   Calendar,
   MapPin,
   Image as ImageIcon,
@@ -40,6 +41,7 @@ interface UploadQueueItem {
   file: File;
   name: string;
   size: number;
+  targetCategory: 'grupal' | 'general';
   status: 'pending' | 'uploading' | 'completed' | 'error';
   errorMessage?: string;
   url?: string;
@@ -87,9 +89,18 @@ export const AdminControlConsole: React.FC = () => {
   // Gallery Subview: Drag & Drop and sequential upload queue
   const [uploadQueue, setUploadQueue] = useState<UploadQueueItem[]>([]);
   const [isProcessingQueue, setIsProcessingQueue] = useState(false);
-  const [isDraggingOver, setIsDraggingOver] = useState(false);
-  const dragCounterRef = useRef(0);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isDraggingGrupal, setIsDraggingGrupal] = useState(false);
+  const [isDraggingGeneral, setIsDraggingGeneral] = useState(false);
+  const dragGrupalCounterRef = useRef(0);
+  const dragGeneralCounterRef = useRef(0);
+  const fileInputGrupalRef = useRef<HTMLInputElement>(null);
+  const fileInputGeneralRef = useRef<HTMLInputElement>(null);
+
+  // Gallery Subview: Selection and bulk delete for general photos
+  const [selectedGeneralIds, setSelectedGeneralIds] = useState<Set<string>>(new Set());
+  const [isDeletingBulk, setIsDeletingBulk] = useState(false);
+  const [generalPage, setGeneralPage] = useState(1);
+  const generalPageSize = 24;
 
   // Prevent browser default file open on window drop
   useEffect(() => {
@@ -131,6 +142,17 @@ export const AdminControlConsole: React.FC = () => {
   const activeGalleryTrip = galleryTripCode
     ? trips.find((t) => t.code.toLowerCase() === galleryTripCode.toLowerCase() || t.id === galleryTripCode)
     : null;
+
+  // Split gallery photos into Grupal and General
+  const grupalPhotos = (activeGalleryTrip?.photos || []).filter((p) => p.category === 'grupal');
+  const generalPhotos = (activeGalleryTrip?.photos || []).filter(
+    (p) => p.category === 'general' || p.category === 'momentos' || p.category === 'destino' || p.category === 'carnaval' || (!p.category && p.category !== 'grupal')
+  );
+
+  const totalGeneralPages = Math.max(1, Math.ceil(generalPhotos.length / generalPageSize));
+  const validGeneralPage = Math.min(generalPage, totalGeneralPages);
+  const startGeneralIndex = (validGeneralPage - 1) * generalPageSize;
+  const paginatedGeneralPhotos = generalPhotos.slice(startGeneralIndex, startGeneralIndex + generalPageSize);
 
   // Handle Quick Copy
   const handleCopyCode = (code: string) => {
@@ -246,18 +268,21 @@ export const AdminControlConsole: React.FC = () => {
   // Open Gallery View for a Group
   const handleOpenGallery = (trip: Vuelta) => {
     setGalleryTripCode(trip.code);
+    setSelectedGeneralIds(new Set());
+    setGeneralPage(1);
     setSearchParams({ galeria: trip.code });
   };
 
   const handleCloseGallery = () => {
     setGalleryTripCode(null);
+    setSelectedGeneralIds(new Set());
     setSearchParams({});
   };
 
   // ==========================================
   // SEQUENTIAL QUEUE UPLOAD SYSTEM (Backblaze & Supabase)
   // ==========================================
-  const handleFilesSelected = (files: FileList | File[] | null) => {
+  const handleFilesSelected = (files: FileList | File[] | null, targetCategory: 'grupal' | 'general' = 'general') => {
     if (!files) return;
     const filesArray = Array.from(files);
     if (filesArray.length === 0) return;
@@ -279,54 +304,78 @@ export const AdminControlConsole: React.FC = () => {
       file,
       name: file.name,
       size: file.size,
+      targetCategory,
       status: 'pending',
     }));
 
     setUploadQueue((prev) => [...prev, ...newItems]);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+    if (targetCategory === 'grupal' && fileInputGrupalRef.current) {
+      fileInputGrupalRef.current.value = '';
+    }
+    if (targetCategory === 'general' && fileInputGeneralRef.current) {
+      fileInputGeneralRef.current.value = '';
     }
   };
 
-  const handleDragEnter = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    dragCounterRef.current += 1;
-    if (e.dataTransfer) {
-      e.dataTransfer.dropEffect = 'copy';
-    }
-    setIsDraggingOver(true);
-  };
-
-  const handleDragOver = (e: React.DragEvent) => {
+  const handleDragEnter = (e: React.DragEvent, target: 'grupal' | 'general') => {
     e.preventDefault();
     e.stopPropagation();
     if (e.dataTransfer) {
       e.dataTransfer.dropEffect = 'copy';
     }
-    if (!isDraggingOver) {
-      setIsDraggingOver(true);
+    if (target === 'grupal') {
+      dragGrupalCounterRef.current += 1;
+      setIsDraggingGrupal(true);
+    } else {
+      dragGeneralCounterRef.current += 1;
+      setIsDraggingGeneral(true);
     }
   };
 
-  const handleDragLeave = (e: React.DragEvent) => {
+  const handleDragOver = (e: React.DragEvent, target: 'grupal' | 'general') => {
     e.preventDefault();
     e.stopPropagation();
-    dragCounterRef.current -= 1;
-    if (dragCounterRef.current <= 0) {
-      dragCounterRef.current = 0;
-      setIsDraggingOver(false);
+    if (e.dataTransfer) {
+      e.dataTransfer.dropEffect = 'copy';
+    }
+    if (target === 'grupal') {
+      if (!isDraggingGrupal) setIsDraggingGrupal(true);
+    } else {
+      if (!isDraggingGeneral) setIsDraggingGeneral(true);
     }
   };
 
-  const handleDrop = (e: React.DragEvent) => {
+  const handleDragLeave = (e: React.DragEvent, target: 'grupal' | 'general') => {
     e.preventDefault();
     e.stopPropagation();
-    dragCounterRef.current = 0;
-    setIsDraggingOver(false);
+    if (target === 'grupal') {
+      dragGrupalCounterRef.current -= 1;
+      if (dragGrupalCounterRef.current <= 0) {
+        dragGrupalCounterRef.current = 0;
+        setIsDraggingGrupal(false);
+      }
+    } else {
+      dragGeneralCounterRef.current -= 1;
+      if (dragGeneralCounterRef.current <= 0) {
+        dragGeneralCounterRef.current = 0;
+        setIsDraggingGeneral(false);
+      }
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent, target: 'grupal' | 'general') => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (target === 'grupal') {
+      dragGrupalCounterRef.current = 0;
+      setIsDraggingGrupal(false);
+    } else {
+      dragGeneralCounterRef.current = 0;
+      setIsDraggingGeneral(false);
+    }
 
     if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      handleFilesSelected(e.dataTransfer.files);
+      handleFilesSelected(e.dataTransfer.files, target);
     }
   };
 
@@ -347,9 +396,10 @@ export const AdminControlConsole: React.FC = () => {
 
       try {
         let uploadedUrl = '';
+        const subfolder = nextItem.targetCategory === 'grupal' ? 'grupales' : 'galeria';
         try {
           // Upload to Backblaze B2 via PHP endpoint
-          const res = await uploadImage(nextItem.file, `grupos/${activeGalleryTrip.code.toLowerCase()}`);
+          const res = await uploadImage(nextItem.file, `grupos/${activeGalleryTrip.code.toLowerCase()}/${subfolder}`);
           if (res.url) {
             uploadedUrl = res.url;
           } else {
@@ -364,7 +414,7 @@ export const AdminControlConsole: React.FC = () => {
         await tripService.addPhoto(activeGalleryTrip.id, {
           url: uploadedUrl,
           filename: nextItem.name,
-          category: 'momentos',
+          category: nextItem.targetCategory,
           file_size: nextItem.size,
         });
 
@@ -400,11 +450,69 @@ export const AdminControlConsole: React.FC = () => {
     await loadTrips();
   };
 
-  // Delete Photo from Album (removes from B2 and database)
+  // Delete Single Photo from Album (purges from Backblaze B2 and Supabase)
   const handleDeletePhoto = async (photoId: string, photoUrl?: string) => {
-    if (!confirm('¿Deseas eliminar esta fotografía de la galería del grupo?')) return;
+    if (!confirm('¿Deseas eliminar permanentemente esta fotografía?\nSe eliminará de Backblaze B2 y de la base de datos.')) return;
     await tripService.deletePhoto(photoId, photoUrl);
+    setSelectedGeneralIds((prev) => {
+      if (prev.has(photoId)) {
+        const next = new Set(prev);
+        next.delete(photoId);
+        return next;
+      }
+      return prev;
+    });
     await loadTrips();
+  };
+
+  // Toggle select all general photos
+  const handleToggleSelectAllGeneral = () => {
+    if (selectedGeneralIds.size === generalPhotos.length) {
+      setSelectedGeneralIds(new Set());
+    } else {
+      setSelectedGeneralIds(new Set(generalPhotos.map((p) => p.id)));
+    }
+  };
+
+  // Toggle single general photo
+  const handleToggleSelectGeneral = (photoId: string) => {
+    setSelectedGeneralIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(photoId)) {
+        next.delete(photoId);
+      } else {
+        next.add(photoId);
+      }
+      return next;
+    });
+  };
+
+  // Bulk delete selected general photos (purges from Backblaze B2 and Supabase)
+  const handleDeleteSelectedGeneral = async () => {
+    if (selectedGeneralIds.size === 0) return;
+    const count = selectedGeneralIds.size;
+    if (
+      !confirm(
+        `¿Confirmas que deseas eliminar permanentemente las ${count} fotografías seleccionadas?\nEsta acción purgará los archivos físicos de Backblaze B2 y de la base de datos.`
+      )
+    ) {
+      return;
+    }
+
+    setIsDeletingBulk(true);
+    try {
+      const toDelete = generalPhotos
+        .filter((p) => selectedGeneralIds.has(p.id))
+        .map((p) => ({ id: p.id, url: p.url }));
+
+      await tripService.deletePhotos(toDelete);
+      setSelectedGeneralIds(new Set());
+      await loadTrips();
+    } catch (err: any) {
+      alert(`Error al eliminar fotografías: ${err?.message || 'Error'}`);
+    } finally {
+      setIsDeletingBulk(false);
+    }
   };
 
   // Logout handler
@@ -596,18 +704,84 @@ export const AdminControlConsole: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Gallery Dropzone & Horizontal Grid Card */}
+                {/* ============================================================ */}
+                {/* SEQUENTIAL QUEUE PROGRESS INDICATOR */}
+                {/* ============================================================ */}
+                {uploadQueue.length > 0 && (
+                  <div className="bg-[#0D1524] border border-white/10 rounded-3xl p-5 space-y-3 shadow-2xl">
+                    <div className="flex items-center justify-between text-xs font-bold text-slate-200">
+                      <span className="flex items-center gap-2">
+                        {isProcessingQueue && <Loader2 size={15} className="animate-spin text-[#159447]" />}
+                        <span>
+                          Cola de subida a Backblaze B2 & CDN ({uploadQueue.filter((q) => q.status === 'completed').length}/{uploadQueue.length})
+                        </span>
+                      </span>
+                      {uploadQueue.some((q) => q.status === 'completed' || q.status === 'error') && (
+                        <button
+                          type="button"
+                          onClick={() => setUploadQueue((prev) => prev.filter((q) => q.status === 'uploading' || q.status === 'pending'))}
+                          className="text-[11px] text-slate-400 hover:text-white underline cursor-pointer"
+                        >
+                          Limpiar finalizados
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+                      {uploadQueue.map((item) => (
+                        <div
+                          key={item.id}
+                          className="flex items-center justify-between gap-3 text-[11px] px-3.5 py-2 rounded-xl bg-black/40 border border-white/5"
+                        >
+                          <div className="flex items-center gap-2 truncate max-w-[280px]">
+                            <span
+                              className={`px-1.5 py-0.5 rounded text-[9px] font-black uppercase ${
+                                item.targetCategory === 'grupal'
+                                  ? 'bg-[#F8C62B]/20 text-[#F8C62B] border border-[#F8C62B]/30'
+                                  : 'bg-[#159447]/20 text-[#159447] border border-[#159447]/30'
+                              }`}
+                            >
+                              {item.targetCategory === 'grupal' ? 'Grupal' : 'Viaje'}
+                            </span>
+                            <span className="truncate text-slate-300 font-mono">{item.name}</span>
+                          </div>
+
+                          <div className="flex items-center gap-2">
+                            {item.status === 'pending' && <span className="text-slate-500 font-medium">En cola</span>}
+                            {item.status === 'uploading' && (
+                              <span className="text-[#159447] flex items-center gap-1 font-bold">
+                                <Loader2 size={12} className="animate-spin text-[#159447]" /> Subiendo a B2...
+                              </span>
+                            )}
+                            {item.status === 'completed' && (
+                              <span className="text-emerald-400 flex items-center gap-1 font-bold">
+                                <CheckCircle2 size={13} /> Subida exitosa
+                              </span>
+                            )}
+                            {item.status === 'error' && (
+                              <span className="text-rose-400 font-bold">{item.errorMessage || 'Error'}</span>
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* ============================================================ */}
+                {/* SECCIÓN 1: GALERÍA DE FOTOS GRUPALES (Image 1 reference) */}
+                {/* ============================================================ */}
                 <div className="bg-[#090E18] border border-white/10 rounded-3xl p-6 sm:p-8 space-y-6">
-                  {/* Gallery header row */}
+                  {/* Header row */}
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/5">
                     <div>
-                      <div className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-[#159447] mb-1">
+                      <div className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-[#F8C62B] mb-1">
                         <span>✦</span>
                         <span>NIVEL DE GRUPO</span>
                       </div>
                       <h3 className="font-outfit font-black text-lg sm:text-xl text-white uppercase flex items-center gap-2">
-                        <ImageIcon size={18} className="text-[#159447]" />
-                        <span>GALERÍA DE FOTOS GRUPALES ({activeGalleryTrip.photos?.length || 0})</span>
+                        <ImageIcon size={18} className="text-[#F8C62B]" />
+                        <span>GALERÍA DE FOTOS GRUPALES ({grupalPhotos.length})</span>
                       </h3>
                       <p className="text-xs text-slate-400 mt-0.5">
                         Podés subir 1 o más fotos grupales oficiales en HD. Los egresados podrán descargarlas en máxima resolución.
@@ -617,16 +791,16 @@ export const AdminControlConsole: React.FC = () => {
                     <div>
                       <input
                         type="file"
-                        ref={fileInputRef}
+                        ref={fileInputGrupalRef}
                         multiple
                         accept="image/jpeg,image/png,image/webp"
                         className="hidden"
-                        onChange={(e) => handleFilesSelected(e.target.files)}
+                        onChange={(e) => handleFilesSelected(e.target.files, 'grupal')}
                       />
                       <button
                         type="button"
-                        onClick={() => fileInputRef.current?.click()}
-                        className="bg-[#159447] hover:bg-[#117739] text-white font-outfit font-black text-xs uppercase px-4 py-2.5 rounded-xl shadow-[0_0_15px_rgba(21,148,71,0.3)] flex items-center gap-2 cursor-pointer transition-all"
+                        onClick={() => fileInputGrupalRef.current?.click()}
+                        className="bg-[#F8C62B] hover:bg-[#e0b024] text-black font-outfit font-black text-xs uppercase px-4 py-2.5 rounded-xl shadow-[0_0_15px_rgba(248,198,43,0.3)] flex items-center gap-2 cursor-pointer transition-all"
                       >
                         <UploadCloud size={15} />
                         <span>SUBIR FOTOS GRUPALES HD</span>
@@ -634,98 +808,50 @@ export const AdminControlConsole: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Drag and Drop Container */}
+                  {/* Drag and Drop Grupal Zone */}
                   <div
-                    onDragEnter={handleDragEnter}
-                    onDragOver={handleDragOver}
-                    onDragLeave={handleDragLeave}
-                    onDrop={handleDrop}
-                    onClick={() => fileInputRef.current?.click()}
+                    onDragEnter={(e) => handleDragEnter(e, 'grupal')}
+                    onDragOver={(e) => handleDragOver(e, 'grupal')}
+                    onDragLeave={(e) => handleDragLeave(e, 'grupal')}
+                    onDrop={(e) => handleDrop(e, 'grupal')}
+                    onClick={() => fileInputGrupalRef.current?.click()}
                     className={`border-2 border-dashed rounded-3xl p-8 sm:p-10 text-center cursor-pointer transition-all duration-200 relative overflow-hidden select-none ${
-                      isDraggingOver
-                        ? 'border-[#159447] bg-[#159447]/20 ring-4 ring-[#159447]/30 scale-[1.01] shadow-[0_0_35px_rgba(21,148,71,0.35)]'
-                        : 'border-white/20 hover:border-[#159447]/60 bg-black/25 hover:bg-black/35 shadow-inner'
+                      isDraggingGrupal
+                        ? 'border-[#F8C62B] bg-[#F8C62B]/20 ring-4 ring-[#F8C62B]/30 scale-[1.01] shadow-[0_0_35px_rgba(248,198,43,0.35)]'
+                        : 'border-white/20 hover:border-[#F8C62B]/60 bg-black/25 hover:bg-black/35 shadow-inner'
                     }`}
                   >
                     <div className="pointer-events-none">
                       <div
                         className={`w-14 h-14 rounded-2xl border flex items-center justify-center mx-auto mb-3 transition-all ${
-                          isDraggingOver
-                            ? 'bg-[#159447] border-[#159447] text-white scale-110 shadow-[0_0_20px_#159447]'
-                            : 'bg-white/5 border-white/10 text-[#159447]'
+                          isDraggingGrupal
+                            ? 'bg-[#F8C62B] border-[#F8C62B] text-black scale-110 shadow-[0_0_20px_#F8C62B]'
+                            : 'bg-white/5 border-white/10 text-[#F8C62B]'
                         }`}
                       >
                         <UploadCloud size={26} />
                       </div>
                       <h4 className="font-outfit font-black text-sm sm:text-base text-white uppercase tracking-wider mb-1">
-                        {isDraggingOver ? '¡SOLTÁ LAS FOTOS AQUÍ PARA SUBIRLAS!' : 'ARRASTRÁ Y SOLTÁ FOTOS GRUPALES AQUÍ'}
+                        {isDraggingGrupal ? '¡SOLTÁ LAS FOTOS GRUPALES AQUÍ!' : 'ARRASTRÁ Y SOLTÁ FOTOS GRUPALES AQUÍ'}
                       </h4>
                       <p className="text-xs text-slate-400 max-w-md mx-auto">
-                        {isDraggingOver
-                          ? 'Subida automática a Backblaze B2 y CDN'
-                          : 'O haz clic para seleccionar varios archivos JPG, PNG o WebP desde tu computadora (cola secuencial)'}
+                        O HAZ CLIC PARA SELECCIONAR VARIOS ARCHIVOS JPG, PNG O WEBP (PROCESAMIENTO EN COLA SECUENCIAL)
                       </p>
                     </div>
                   </div>
 
-                  {/* Sequential Queue Progress Indicators */}
-                  {uploadQueue.length > 0 && (
-                    <div className="bg-[#0D1524] border border-white/10 rounded-2xl p-4 space-y-2">
-                      <div className="flex items-center justify-between text-xs font-bold text-slate-300">
-                        <span className="flex items-center gap-2">
-                          {isProcessingQueue && <Loader2 size={13} className="animate-spin text-[#159447]" />}
-                          <span>Cola de subida secuencial ({uploadQueue.filter((q) => q.status === 'completed').length}/{uploadQueue.length})</span>
-                        </span>
-                        {uploadQueue.some((q) => q.status === 'completed' || q.status === 'error') && (
-                          <button
-                            type="button"
-                            onClick={() => setUploadQueue((prev) => prev.filter((q) => q.status === 'uploading' || q.status === 'pending'))}
-                            className="text-[10px] text-slate-400 hover:text-white"
-                          >
-                            Limpiar finalizados
-                          </button>
-                        )}
-                      </div>
-
-                      <div className="space-y-1.5 max-h-40 overflow-y-auto pr-1">
-                        {uploadQueue.map((item) => (
-                          <div
-                            key={item.id}
-                            className="flex items-center justify-between gap-3 text-[11px] px-3 py-1.5 rounded-lg bg-black/30 border border-white/5"
-                          >
-                            <span className="truncate max-w-[200px] text-slate-300">{item.name}</span>
-                            <div className="flex items-center gap-2">
-                              {item.status === 'pending' && <span className="text-slate-500">En cola</span>}
-                              {item.status === 'uploading' && (
-                                <span className="text-[#159447] flex items-center gap-1 font-semibold">
-                                  <Loader2 size={11} className="animate-spin text-[#159447]" /> Subiendo a Backblaze...
-                                </span>
-                              )}
-                              {item.status === 'completed' && (
-                                <span className="text-[#159447] flex items-center gap-1 font-bold">
-                                  <CheckCircle2 size={12} /> Subida exitosa
-                                </span>
-                              )}
-                              {item.status === 'error' && (
-                                <span className="text-rose-400 font-bold">Error</span>
-                              )}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Horizontal / Responsive Photos Grid */}
+                  {/* Grupal Photos Grid (Horizontal cards with badges like Image 1) */}
                   <div>
-                    {activeGalleryTrip.photos && activeGalleryTrip.photos.length > 0 ? (
-                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-                        {activeGalleryTrip.photos.map((photo, idx) => {
+                    {grupalPhotos.length > 0 ? (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                        {grupalPhotos.map((photo, idx) => {
                           const isCover = activeGalleryTrip.cover_image === photo.url;
                           return (
                             <div
                               key={photo.id}
-                              className="group relative rounded-2xl overflow-hidden bg-black border border-white/10 hover:border-white/20 transition-all shadow-lg aspect-[4/3]"
+                              className={`group relative rounded-2xl overflow-hidden bg-black border transition-all shadow-lg aspect-[16/10] ${
+                                isCover ? 'border-[#F8C62B] ring-2 ring-[#F8C62B]/40' : 'border-white/15 hover:border-white/30'
+                              }`}
                             >
                               <img
                                 src={getCdnUrl(photo.url)}
@@ -736,34 +862,34 @@ export const AdminControlConsole: React.FC = () => {
                                 }}
                               />
 
-                              {/* Top Bar Badges */}
-                              <div className="absolute top-2 left-2 right-2 flex items-center justify-between gap-1 pointer-events-none z-10">
-                                <span className="bg-black/75 backdrop-blur-md text-white text-[10px] font-black uppercase px-2 py-0.5 rounded-md border border-white/10">
+                              {/* Top Badges */}
+                              <div className="absolute top-2.5 left-2.5 right-2.5 flex items-center justify-between gap-1 z-10">
+                                <span className="bg-black/80 backdrop-blur-md text-white text-[10px] font-black uppercase px-2.5 py-1 rounded-lg border border-white/10">
                                   FOTO GRUPAL #{idx + 1}
                                 </span>
 
                                 {isCover ? (
-                                  <span className="bg-[#159447] text-white text-[10px] font-black uppercase px-2 py-0.5 rounded-md shadow-md flex items-center gap-1">
-                                    <Star size={10} fill="currentColor" />
+                                  <span className="bg-[#F8C62B] text-black text-[10px] font-black uppercase px-2.5 py-1 rounded-lg shadow-md flex items-center gap-1">
+                                    <Star size={11} fill="currentColor" />
                                     PORTADA OFICIAL
                                   </span>
                                 ) : (
                                   <button
                                     type="button"
                                     onClick={() => handleSetCoverPhoto(photo.url)}
-                                    className="pointer-events-auto opacity-0 group-hover:opacity-100 bg-black/80 hover:bg-[#159447] text-slate-300 hover:text-white text-[10px] font-bold px-2 py-0.5 rounded-md border border-white/10 transition-all flex items-center gap-1"
+                                    className="opacity-0 group-hover:opacity-100 bg-black/85 hover:bg-[#F8C62B] text-slate-300 hover:text-black text-[10px] font-bold px-2.5 py-1 rounded-lg border border-white/10 transition-all flex items-center gap-1 cursor-pointer"
                                     title="Marcar como foto de portada"
                                   >
-                                    <Star size={10} />
+                                    <Star size={11} />
                                     <span>Hacer Portada</span>
                                   </button>
                                 )}
                               </div>
 
-                              {/* Bottom Overlay Actions */}
-                              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity p-3 flex flex-col justify-end">
+                              {/* Bottom Actions */}
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity p-3 flex flex-col justify-end">
                                 <div className="flex items-center justify-between gap-2 text-white">
-                                  <span className="text-[10px] font-mono truncate text-slate-300 max-w-[70%]">
+                                  <span className="text-[10px] font-mono truncate text-slate-300 max-w-[65%]">
                                     {photo.filename}
                                   </span>
                                   <div className="flex items-center gap-1.5">
@@ -774,15 +900,15 @@ export const AdminControlConsole: React.FC = () => {
                                       className="p-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white transition-colors"
                                       title="Ver en alta resolución"
                                     >
-                                      <ExternalLink size={12} />
+                                      <ExternalLink size={13} />
                                     </a>
                                     <button
                                       type="button"
                                       onClick={() => handleDeletePhoto(photo.id, photo.url)}
-                                      className="p-1.5 rounded-lg bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white transition-colors"
-                                      title="Eliminar fotografía"
+                                      className="p-1.5 rounded-lg bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white transition-colors cursor-pointer"
+                                      title="Eliminar foto grupal"
                                     >
-                                      <Trash2 size={12} />
+                                      <Trash2 size={13} />
                                     </button>
                                   </div>
                                 </div>
@@ -792,8 +918,242 @@ export const AdminControlConsole: React.FC = () => {
                         })}
                       </div>
                     ) : (
-                      <div className="py-12 text-center text-slate-500 text-xs">
-                        No hay fotografías cargadas aún para este grupo. Arrastrá fotos arriba o haz clic en "SUBIR FOTOS GRUPALES HD".
+                      <div className="py-8 text-center text-slate-500 text-xs bg-black/20 rounded-2xl border border-white/5">
+                        No hay fotos grupales oficiales cargadas para este grupo. Arrastrá fotos arriba o haz clic en "SUBIR FOTOS GRUPALES HD".
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* ============================================================ */}
+                {/* SECCIÓN 2: GALERÍA DE FOTOS DEL VIAJE (Image 2 reference) */}
+                {/* ============================================================ */}
+                <div className="bg-[#090E18] border border-white/10 rounded-3xl p-6 sm:p-8 space-y-6">
+                  {/* Header row */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/5">
+                    <div>
+                      <div className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-[#159447] mb-1">
+                        <span>✦</span>
+                        <span>GALERÍA GENERAL</span>
+                      </div>
+                      <h3 className="font-outfit font-black text-lg sm:text-xl text-white uppercase flex items-center gap-2">
+                        <ImageIcon size={18} className="text-[#159447]" />
+                        <span>GALERÍA DE FOTOS DEL VIAJE ({generalPhotos.length})</span>
+                      </h3>
+                      <p className="text-xs text-slate-400 mt-0.5">
+                        Fotos comunes de excursiones, fiestas y actividades compartidas por todos los chicos del grupo.
+                      </p>
+                    </div>
+
+                    <div>
+                      <input
+                        type="file"
+                        ref={fileInputGeneralRef}
+                        multiple
+                        accept="image/jpeg,image/png,image/webp"
+                        className="hidden"
+                        onChange={(e) => handleFilesSelected(e.target.files, 'general')}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => fileInputGeneralRef.current?.click()}
+                        className="bg-[#159447] hover:bg-[#117739] text-white font-outfit font-black text-xs uppercase px-4 py-2.5 rounded-xl shadow-[0_0_15px_rgba(21,148,71,0.3)] flex items-center gap-2 cursor-pointer transition-all"
+                      >
+                        <UploadCloud size={15} />
+                        <span>SUBIR FOTOS DEL VIAJE</span>
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Dropzone General matching Image 2 */}
+                  <div
+                    onDragEnter={(e) => handleDragEnter(e, 'general')}
+                    onDragOver={(e) => handleDragOver(e, 'general')}
+                    onDragLeave={(e) => handleDragLeave(e, 'general')}
+                    onDrop={(e) => handleDrop(e, 'general')}
+                    onClick={() => fileInputGeneralRef.current?.click()}
+                    className={`border-2 border-dashed rounded-3xl p-8 sm:p-10 text-center cursor-pointer transition-all duration-200 relative overflow-hidden select-none ${
+                      isDraggingGeneral
+                        ? 'border-[#159447] bg-[#159447]/20 ring-4 ring-[#159447]/30 scale-[1.01] shadow-[0_0_35px_rgba(21,148,71,0.35)]'
+                        : 'border-white/20 hover:border-[#159447]/60 bg-black/25 hover:bg-black/35 shadow-inner'
+                    }`}
+                  >
+                    <div className="pointer-events-none">
+                      <div
+                        className={`w-14 h-14 rounded-2xl border flex items-center justify-center mx-auto mb-3 transition-all ${
+                          isDraggingGeneral
+                            ? 'bg-[#159447] border-[#159447] text-white scale-110 shadow-[0_0_20px_#159447]'
+                            : 'bg-white/5 border-white/10 text-[#159447]'
+                        }`}
+                      >
+                        <UploadCloud size={26} />
+                      </div>
+                      <h4 className="font-outfit font-black text-sm sm:text-base text-white uppercase tracking-wider mb-1">
+                        {isDraggingGeneral ? '¡SOLTÁ LAS FOTOS DEL VIAJE AQUÍ!' : 'ARRASTRÁ TUS FOTOS ACÁ O EXPLORÁ LOS ARCHIVOS'}
+                      </h4>
+                      <p className="text-xs text-slate-400 max-w-md mx-auto">
+                        FORMATOS SOPORTADOS: JPG, PNG, WEBP. PODÉS ARRASTRAR DECENAS DE FOTOS JUNTAS.
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Subheader / Selection Bar matching Image 2 */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-2 pb-2">
+                    <div className="text-xs font-bold text-slate-300 font-mono uppercase tracking-wider">
+                      FOTOS REGISTRADAS ({generalPhotos.length})
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2">
+                      {/* Botón Seleccionar Todas / Deseleccionar */}
+                      {generalPhotos.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={handleToggleSelectAllGeneral}
+                          className="bg-[#121826] hover:bg-white/10 text-slate-200 hover:text-white border border-white/10 text-xs font-bold uppercase tracking-wider px-3.5 py-2 rounded-xl transition-all flex items-center gap-2 cursor-pointer"
+                        >
+                          <CheckSquare size={14} className="text-[#159447]" />
+                          <span>
+                            {selectedGeneralIds.size === generalPhotos.length
+                              ? 'DESELECCIONAR TODAS'
+                              : `SELECCIONAR TODAS (${generalPhotos.length})`}
+                          </span>
+                        </button>
+                      )}
+
+                      {/* Botón Eliminar Seleccionadas (Activo si hay 1 o más seleccionadas) */}
+                      {selectedGeneralIds.size > 0 && (
+                        <button
+                          type="button"
+                          disabled={isDeletingBulk}
+                          onClick={handleDeleteSelectedGeneral}
+                          className="bg-rose-600 hover:bg-rose-500 text-white font-outfit font-black text-xs uppercase tracking-wider px-4 py-2 rounded-xl shadow-lg shadow-rose-600/30 flex items-center gap-2 cursor-pointer transition-all animate-slideIn"
+                        >
+                          {isDeletingBulk ? (
+                            <Loader2 size={14} className="animate-spin text-white" />
+                          ) : (
+                            <Trash2 size={14} />
+                          )}
+                          <span>ELIMINAR SELECCIONADAS ({selectedGeneralIds.size})</span>
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Grid of General Photos (Image 2 exact: 6 columns) */}
+                  <div>
+                    {generalPhotos.length > 0 ? (
+                      <>
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+                          {paginatedGeneralPhotos.map((photo, idx) => {
+                            const isSelected = selectedGeneralIds.has(photo.id);
+                            const photoNum = startGeneralIndex + idx + 1;
+                            return (
+                              <div
+                                key={photo.id}
+                                onClick={() => handleToggleSelectGeneral(photo.id)}
+                                className={`group relative rounded-2xl overflow-hidden bg-black border transition-all shadow-md aspect-square cursor-pointer select-none ${
+                                  isSelected
+                                    ? 'border-[#159447] ring-2 ring-[#159447] shadow-[0_0_15px_rgba(21,148,71,0.5)] scale-[0.98]'
+                                    : 'border-white/10 hover:border-white/25'
+                                }`}
+                              >
+                                <img
+                                  src={getCdnUrl(photo.url)}
+                                  alt={photo.filename}
+                                  loading="lazy"
+                                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                  onError={(e) => {
+                                    (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80';
+                                  }}
+                                />
+
+                                {/* Top-Left Selection Checkbox */}
+                                <div
+                                  className={`absolute top-2 left-2 w-6 h-6 rounded-lg flex items-center justify-center transition-all z-10 ${
+                                    isSelected
+                                      ? 'bg-[#159447] text-white shadow-md'
+                                      : 'bg-black/60 border border-white/30 text-transparent opacity-0 group-hover:opacity-100 hover:border-white'
+                                  }`}
+                                >
+                                  <Check size={13} className={isSelected ? 'text-white' : 'opacity-0'} />
+                                </div>
+
+                                {/* Top-Right Index */}
+                                <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                                  <span className="bg-black/70 text-white font-mono text-[9px] px-1.5 py-0.5 rounded">
+                                    #{photoNum}
+                                  </span>
+                                </div>
+
+                                {/* Hover Overlay with Delete & External view */}
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity p-2 flex flex-col justify-end">
+                                  <div className="flex items-center justify-between gap-1 text-white">
+                                    <span className="text-[9px] font-mono truncate text-slate-300 max-w-[60%]">
+                                      {photo.filename}
+                                    </span>
+                                    <div className="flex items-center gap-1">
+                                      <a
+                                        href={photo.url}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        onClick={(e) => e.stopPropagation()}
+                                        className="p-1 rounded bg-white/10 hover:bg-white/20 text-white transition-colors"
+                                        title="Ver en pestaña nueva"
+                                      >
+                                        <ExternalLink size={11} />
+                                      </a>
+                                      <button
+                                        type="button"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleDeletePhoto(photo.id, photo.url);
+                                        }}
+                                        className="p-1 rounded bg-rose-500/20 hover:bg-rose-500 text-rose-300 hover:text-white transition-colors cursor-pointer"
+                                        title="Eliminar foto"
+                                      >
+                                        <Trash2 size={11} />
+                                      </button>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })}
+                        </div>
+
+                        {/* Pagination if more than pageSize */}
+                        {generalPhotos.length > generalPageSize && (
+                          <div className="mt-4 pt-4 border-t border-white/5 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400">
+                            <div>
+                              Mostrando <strong className="text-white">{startGeneralIndex + 1} - {Math.min(startGeneralIndex + generalPageSize, generalPhotos.length)}</strong> de <strong className="text-white">{generalPhotos.length}</strong> fotos
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <button
+                                type="button"
+                                disabled={validGeneralPage <= 1}
+                                onClick={() => setGeneralPage((p) => Math.max(1, p - 1))}
+                                className="p-1.5 rounded-lg border border-white/10 hover:bg-white/5 disabled:opacity-30 disabled:pointer-events-none"
+                              >
+                                <ChevronLeft size={14} />
+                              </button>
+                              <span className="px-2 font-mono text-white text-xs">
+                                Página {validGeneralPage} de {totalGeneralPages}
+                              </span>
+                              <button
+                                type="button"
+                                disabled={validGeneralPage >= totalGeneralPages}
+                                onClick={() => setGeneralPage((p) => Math.min(totalGeneralPages, p + 1))}
+                                className="p-1.5 rounded-lg border border-white/10 hover:bg-white/5 disabled:opacity-30 disabled:pointer-events-none"
+                              >
+                                <ChevronRight size={14} />
+                              </button>
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    ) : (
+                      <div className="py-12 text-center text-slate-500 text-xs bg-black/20 rounded-2xl border border-white/5">
+                        No hay fotos de la galería cargadas para este grupo. Arrastrá fotos arriba o haz clic en "SUBIR FOTOS DEL VIAJE".
                       </div>
                     )}
                   </div>

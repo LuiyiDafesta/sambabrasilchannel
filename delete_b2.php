@@ -25,61 +25,100 @@ $b2BucketName  = getenv('B2_BUCKET_NAME') ?: ($config['bucket_name'] ?? 'SambaBr
 $b2Region      = getenv('B2_REGION') ?: ($config['region'] ?? 'us-west-004');
 $b2Endpoint    = getenv('B2_ENDPOINT') ?: ($config['endpoint'] ?? 's3.us-west-004.backblazeb2.com');
 
-// 2. Parse Input Payload
+// 2. Parse Input Payload (Supports single URL or array of URLs for bulk deletion)
 $input = json_decode(file_get_contents('php://input'), true) ?? [];
-$target = $_POST['url'] ?? $_POST['key'] ?? $input['url'] ?? $input['key'] ?? $_GET['url'] ?? $_GET['key'] ?? '';
 
-if (empty($target)) {
+$targets = [];
+if (!empty($input['urls']) && is_array($input['urls'])) {
+    $targets = $input['urls'];
+} elseif (!empty($_POST['urls']) && is_array($_POST['urls'])) {
+    $targets = $_POST['urls'];
+} else {
+    $single = $_POST['url'] ?? $_POST['key'] ?? $input['url'] ?? $input['key'] ?? $_GET['url'] ?? $_GET['key'] ?? '';
+    if (!empty($single)) {
+        $targets = [$single];
+    }
+}
+
+if (empty($targets)) {
     http_response_code(400);
-    echo json_encode(['success' => false, 'error' => 'URL or key parameter missing']);
+    echo json_encode(['success' => false, 'error' => 'URL, key or urls array missing']);
     exit();
 }
 
-// 3. Extract Object Key from URL or Key
-$objectKey = $target;
+$results = [];
+$totalDeleted = 0;
 
-// Strip query string if present
-if (($qPos = strpos($objectKey, '?')) !== false) {
-    $objectKey = substr($objectKey, 0, $qPos);
+foreach ($targets as $target) {
+    if (empty($target) || !is_string($target)) continue;
+
+    $objectKey = $target;
+
+    // Strip query string if present
+    if (($qPos = strpos($objectKey, '?')) !== false) {
+        $objectKey = substr($objectKey, 0, $qPos);
+    }
+
+    // Match CDN URL or generic URL
+    if (strpos($objectKey, $cdnBaseUrl) === 0) {
+        $objectKey = substr($objectKey, strlen($cdnBaseUrl));
+    } elseif (preg_match('#https?://[^/]+/(.+)#', $objectKey, $matches)) {
+        $objectKey = $matches[1];
+    }
+
+    $objectKey = ltrim($objectKey, '/');
+
+    // Security check: Prevent directory traversal
+    if (strpos($objectKey, '..') !== false) {
+        $results[] = ['object_key' => $objectKey, 'success' => false, 'error' => 'Invalid object key'];
+        continue;
+    }
+
+    $b2Deleted = false;
+    $localDeleted = false;
+    $errorMsg = '';
+
+    // Check if local fallback file exists and delete it
+    $localPath = __DIR__ . '/' . $objectKey;
+    if (file_exists($localPath) && is_file($localPath)) {
+        @unlink($localPath);
+        $localDeleted = true;
+    }
+
+    // Delete from Backblaze B2 via S3 SigV4
+    $b2Deleted = deleteSigV4($b2Endpoint, $b2BucketName, $b2Region, $b2KeyId, $b2AppKey, $objectKey, $errorMsg);
+
+    $isSuccess = $b2Deleted || $localDeleted;
+    if ($isSuccess) $totalDeleted++;
+
+    $results[] = [
+        'object_key'    => $objectKey,
+        'b2_deleted'    => $b2Deleted,
+        'local_deleted' => $localDeleted,
+        'success'       => $isSuccess,
+        'details'       => $errorMsg ?: 'Deleted successfully'
+    ];
 }
 
-// Match CDN URL or generic URL
-if (strpos($objectKey, $cdnBaseUrl) === 0) {
-    $objectKey = substr($objectKey, strlen($cdnBaseUrl));
-} elseif (preg_match('#https?://[^/]+/(.+)#', $objectKey, $matches)) {
-    $objectKey = $matches[1];
+// Response
+$isSingle = count($targets) === 1;
+if ($isSingle) {
+    $res = $results[0] ?? ['success' => false];
+    echo json_encode([
+        'success'       => $res['success'] ?? false,
+        'object_key'    => $res['object_key'] ?? '',
+        'b2_deleted'    => $res['b2_deleted'] ?? false,
+        'local_deleted' => $res['local_deleted'] ?? false,
+        'details'       => $res['details'] ?? ''
+    ]);
+} else {
+    echo json_encode([
+        'success'       => $totalDeleted > 0,
+        'total'         => count($targets),
+        'deleted_count' => $totalDeleted,
+        'results'       => $results
+    ]);
 }
-
-$objectKey = ltrim($objectKey, '/');
-
-// Security check: Prevent directory traversal
-if (strpos($objectKey, '..') !== false) {
-    http_response_code(400);
-    echo json_encode(['success' => false, 'error' => 'Invalid object key']);
-    exit();
-}
-
-$b2Deleted = false;
-$localDeleted = false;
-$errorMsg = '';
-
-// 4. Check if local fallback file exists and delete it
-$localPath = __DIR__ . '/' . $objectKey;
-if (file_exists($localPath) && is_file($localPath)) {
-    @unlink($localPath);
-    $localDeleted = true;
-}
-
-// 5. Delete from Backblaze B2 via S3 SigV4
-$b2Deleted = deleteSigV4($b2Endpoint, $b2BucketName, $b2Region, $b2KeyId, $b2AppKey, $objectKey, $errorMsg);
-
-echo json_encode([
-    'success'       => $b2Deleted || $localDeleted,
-    'object_key'    => $objectKey,
-    'b2_deleted'    => $b2Deleted,
-    'local_deleted' => $localDeleted,
-    'details'       => $errorMsg ?: 'Deleted successfully'
-]);
 exit();
 
 /**

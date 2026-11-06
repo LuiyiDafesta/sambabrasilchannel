@@ -39,6 +39,29 @@ export async function deleteImage(urlOrKey: string): Promise<boolean> {
   }
 }
 
+export async function deleteImages(urlsOrKeys: string[]): Promise<boolean> {
+  const cleanList = (urlsOrKeys || []).filter(Boolean);
+  if (cleanList.length === 0) return true;
+  try {
+    const response = await fetch(DELETE_API, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ urls: cleanList }),
+    });
+    if (!response.ok) {
+      console.warn(`[Storage] Failed to delete bulk images: HTTP ${response.status}`);
+      return false;
+    }
+    const data = await response.json().catch(() => ({}));
+    return !!data.success;
+  } catch (err) {
+    console.warn(`[Storage] Error deleting bulk images from B2/storage:`, err);
+    return false;
+  }
+}
+
 export async function uploadImage(file: File, folder: string = 'gallery'): Promise<UploadResult> {
   const formData = new FormData();
   formData.append('file', file);
