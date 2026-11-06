@@ -67,21 +67,8 @@ export async function downloadPhotosAsZip(
       }
 
       const blob = await res.blob();
-      let safeFilename = (photo.filename || `foto-${currentIndex}.jpg`).trim();
-      if (!/\.(jpe?g|png|webp|gif|bmp)$/i.test(safeFilename)) {
-        safeFilename += '.jpg';
-      }
-      safeFilename = safeFilename.replace(/[<>:"/\\|?*]/g, '_');
-
-      // Deduplicate if needed
-      if (zip.file(safeFilename)) {
-        const lastDot = safeFilename.lastIndexOf('.');
-        if (lastDot > 0) {
-          safeFilename = `${safeFilename.substring(0, lastDot)}-${currentIndex}${safeFilename.substring(lastDot)}`;
-        } else {
-          safeFilename = `${safeFilename}-${currentIndex}.jpg`;
-        }
-      }
+      const prefix = photo.category === 'grupal' ? 'Foto-Grupal' : 'Foto-Viaje';
+      const safeFilename = `${prefix}-${String(currentIndex).padStart(3, '0')}.jpg`;
 
       zip.file(safeFilename, blob);
       addedCount++;
@@ -176,7 +163,10 @@ export async function downloadPhotosSequentially(
       isError: false,
     });
 
-    await downloadDirectPhoto(photo.url, photo.filename || `foto-${currentIndex}.jpg`);
+    const cleanName = photo.category === 'grupal'
+      ? `foto-grupal-${String(currentIndex).padStart(3, '0')}.jpg`
+      : `foto-viaje-${String(currentIndex).padStart(3, '0')}.jpg`;
+    await downloadDirectPhoto(photo.url, cleanName);
 
     // 400ms pause between downloads
     if (i < total - 1) {

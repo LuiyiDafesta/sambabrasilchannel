@@ -151,8 +151,11 @@ export const FlexibleGallery: React.FC<FlexibleGalleryProps> = ({
   // Direct download for single photo (without zip compression)
   const handleDownloadSingleDirect = async (photo: Fotografia, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
-    setDirectDownloadToast(`Descargando ${photo.filename || 'foto'}...`);
-    await downloadDirectPhoto(photo.url, photo.filename || `foto-${photo.id}.jpg`);
+    setDirectDownloadToast('Descargando fotografía en alta resolución...');
+    const defaultDownloadName = isGrupalSection
+      ? `foto-grupal-${tripCode.toLowerCase().replace(/[^a-z0-9_-]/g, '')}.jpg`
+      : `foto-viaje-${tripCode.toLowerCase().replace(/[^a-z0-9_-]/g, '')}.jpg`;
+    await downloadDirectPhoto(photo.url, defaultDownloadName);
     setTimeout(() => setDirectDownloadToast(null), 3000);
   };
 
@@ -480,7 +483,7 @@ export const FlexibleGallery: React.FC<FlexibleGalleryProps> = ({
                 {/* Photo image via CDN */}
                 <img
                   src={cdnUrl}
-                  alt={photo.filename || `Foto ${photoNumber}`}
+                  alt={isGrupalSection ? `Foto Grupal Oficial #${photoNumber}` : `Foto del Viaje #${photoNumber}`}
                   loading="lazy"
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   onError={(e) => {
@@ -515,11 +518,7 @@ export const FlexibleGallery: React.FC<FlexibleGalleryProps> = ({
                 </div>
 
                 {/* Bottom Overlay Actions: Single Direct Download & Zoom */}
-                <div className="absolute bottom-2.5 left-2.5 right-2.5 z-20 flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity">
-                  <span className="text-[10px] text-slate-300 font-mono truncate max-w-[60%]">
-                    {photo.filename || `Foto #${photoNumber}`}
-                  </span>
-
+                <div className="absolute bottom-2.5 right-2.5 z-20 flex items-center justify-end opacity-0 group-hover:opacity-100 transition-opacity">
                   <div className="flex flex-wrap items-center justify-center gap-1.5">
                     {/* Botón Descarga Individual Directa (Sin ZIP) */}
                     <button
@@ -659,8 +658,8 @@ export const FlexibleGallery: React.FC<FlexibleGalleryProps> = ({
         <div className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4 animate-fadeIn">
           {/* Top Bar with actions */}
           <div className="absolute top-4 left-4 right-4 flex items-center justify-between text-white z-20">
-            <span className="text-xs font-mono text-slate-300 truncate max-w-xs">
-              {activeLightboxPhoto.filename || 'Foto'}
+            <span className="text-xs font-outfit font-bold uppercase tracking-wider text-slate-300">
+              {isGrupalSection ? 'Foto Grupal Oficial' : 'Foto del Viaje'}
             </span>
             <div className="flex items-center gap-2">
               {/* Direct single photo download */}
@@ -688,7 +687,7 @@ export const FlexibleGallery: React.FC<FlexibleGalleryProps> = ({
           <div className="max-w-5xl max-h-[85vh] w-full flex items-center justify-center">
             <img
               src={getCdnUrl(activeLightboxPhoto.url)}
-              alt={activeLightboxPhoto.filename || 'Foto'}
+              alt="Fotografía Samba Brasil"
               className="max-w-full max-h-[80vh] object-contain rounded-2xl shadow-2xl"
               onError={(e) => {
                 (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=85';
