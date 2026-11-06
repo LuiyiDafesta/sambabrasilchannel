@@ -6,6 +6,7 @@ import {
   Copy,
   Check,
   CheckSquare,
+  RotateCw,
   Calendar,
   MapPin,
   Image as ImageIcon,
@@ -379,7 +380,7 @@ export const AdminControlConsole: React.FC = () => {
     }
   };
 
-  // Process queue sequentially one by one
+  // Process queue sequentially one by one with automatic retry
   useEffect(() => {
     if (!activeGalleryTrip || isProcessingQueue) return;
 
@@ -391,23 +392,35 @@ export const AdminControlConsole: React.FC = () => {
 
       // Mark as uploading
       setUploadQueue((prev) =>
-        prev.map((i) => (i.id === nextItem.id ? { ...i, status: 'uploading' } : i))
+        prev.map((i) => (i.id === nextItem.id ? { ...i, status: 'uploading', errorMessage: undefined } : i))
       );
 
       try {
         let uploadedUrl = '';
         const subfolder = nextItem.targetCategory === 'grupal' ? 'grupales' : 'galeria';
-        try {
-          // Upload to Backblaze B2 via PHP endpoint
-          const res = await uploadImage(nextItem.file, `grupos/${activeGalleryTrip.code.toLowerCase()}/${subfolder}`);
-          if (res.url) {
-            uploadedUrl = res.url;
-          } else {
-            throw new Error('El servidor no retornó una URL válida');
+
+        // Auto-retry up to 3 attempts with exponential delay for transient 502/network drops
+        let lastError: any = null;
+        for (let attempt = 1; attempt <= 3; attempt++) {
+          try {
+            if (attempt > 1) {
+              await new Promise((r) => setTimeout(r, 1200 * (attempt - 1)));
+            }
+            const res = await uploadImage(nextItem.file, `grupos/${activeGalleryTrip.code.toLowerCase()}/${subfolder}`);
+            if (res && res.url) {
+              uploadedUrl = res.url;
+              break;
+            } else {
+              throw new Error('El servidor no retornó una URL válida');
+            }
+          } catch (uploadErr: any) {
+            lastError = uploadErr;
+            console.warn(`[Queue Upload] Intento ${attempt}/3 falló para ${nextItem.name}:`, uploadErr);
           }
-        } catch (uploadErr: any) {
-          console.error('[Queue Upload] PHP/B2 upload failed:', uploadErr);
-          throw new Error(uploadErr?.message || 'Error al subir la fotografía al servidor');
+        }
+
+        if (!uploadedUrl) {
+          throw lastError || new Error('Error al subir la fotografía al servidor');
         }
 
         // Register in Supabase photos table
@@ -421,9 +434,12 @@ export const AdminControlConsole: React.FC = () => {
         // Mark as completed
         setUploadQueue((prev) =>
           prev.map((i) =>
-            i.id === nextItem.id ? { ...i, status: 'completed', url: uploadedUrl } : i
+            i.id === nextItem.id ? { ...i, status: 'completed', url: uploadedUrl, errorMessage: undefined } : i
           )
         );
+
+        // Small 150ms gentle pause to avoid saturating gateway
+        await new Promise((r) => setTimeout(r, 150));
 
         // Refresh trips data to show new photo
         await loadTrips();
@@ -442,6 +458,38 @@ export const AdminControlConsole: React.FC = () => {
 
     processItem();
   }, [uploadQueue, isProcessingQueue, activeGalleryTrip]);
+
+  // Retry all failed uploads in the queue
+  const handleRetryFailedUploads = () => {
+    setUploadQueue((prev) =>
+      prev.map((i) =>
+        i.status === 'error'
+          ? { ...i, status: 'pending', errorMessage: undefined }
+          : i
+      )
+    );
+  };
+
+  // Retry a single failed item
+  const handleRetrySingleUpload = (itemId: string) => {
+    setUploadQueue((prev) =>
+      prev.map((i) =>
+        i.id === itemId
+          ? { ...i, status: 'pending', errorMessage: undefined }
+          : i
+      )
+    );
+  };
+
+  // Clear completed uploads only
+  const handleClearCompletedUploads = () => {
+    setUploadQueue((prev) => prev.filter((i) => i.status !== 'completed'));
+  };
+
+  // Clear entire queue
+  const handleClearAllQueue = () => {
+    setUploadQueue((prev) => prev.filter((i) => i.status === 'uploading'));
+  };
 
   // Set Cover Photo
   const handleSetCoverPhoto = async (photoUrl: string) => {
@@ -705,29 +753,62 @@ export const AdminControlConsole: React.FC = () => {
                 </div>
 
                 {/* ============================================================ */}
-                {/* SEQUENTIAL QUEUE PROGRESS INDICATOR */}
+                {/* SEQUENTIAL QUEUE PROGRESS INDICATOR WITH RETRY */}
                 {/* ============================================================ */}
                 {uploadQueue.length > 0 && (
                   <div className="bg-[#0D1524] border border-white/10 rounded-3xl p-5 space-y-3 shadow-2xl">
-                    <div className="flex items-center justify-between text-xs font-bold text-slate-200">
-                      <span className="flex items-center gap-2">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs font-bold text-slate-200">
+                      <span className="flex items-center gap-2 flex-wrap">
                         {isProcessingQueue && <Loader2 size={15} className="animate-spin text-[#159447]" />}
                         <span>
                           Cola de subida a Backblaze B2 & CDN ({uploadQueue.filter((q) => q.status === 'completed').length}/{uploadQueue.length})
                         </span>
+                        {uploadQueue.filter((q) => q.status === 'error').length > 0 && (
+                          <span className="px-2 py-0.5 rounded-full bg-rose-500/20 border border-rose-500/40 text-rose-400 text-[10px] font-black">
+                            {uploadQueue.filter((q) => q.status === 'error').length} con error
+                          </span>
+                        )}
                       </span>
-                      {uploadQueue.some((q) => q.status === 'completed' || q.status === 'error') && (
-                        <button
-                          type="button"
-                          onClick={() => setUploadQueue((prev) => prev.filter((q) => q.status === 'uploading' || q.status === 'pending'))}
-                          className="text-[11px] text-slate-400 hover:text-white underline cursor-pointer"
-                        >
-                          Limpiar finalizados
-                        </button>
-                      )}
+
+                      <div className="flex flex-wrap items-center gap-2">
+                        {/* Botón Reintentar Fallidas si hay errores */}
+                        {uploadQueue.some((q) => q.status === 'error') && (
+                          <button
+                            type="button"
+                            onClick={handleRetryFailedUploads}
+                            disabled={isProcessingQueue}
+                            className="bg-[#F8C62B] hover:bg-[#e0b024] text-black font-outfit font-black text-xs uppercase px-3.5 py-1.5 rounded-xl shadow-md flex items-center gap-1.5 transition-all cursor-pointer disabled:opacity-50"
+                          >
+                            <RotateCw size={13} className={isProcessingQueue ? 'animate-spin' : ''} />
+                            <span>REINTENTAR FALLIDAS ({uploadQueue.filter((q) => q.status === 'error').length})</span>
+                          </button>
+                        )}
+
+                        {/* Botón Limpiar finalizados (solo los que subieron con éxito) */}
+                        {uploadQueue.some((q) => q.status === 'completed') && (
+                          <button
+                            type="button"
+                            onClick={handleClearCompletedUploads}
+                            className="text-[11px] text-slate-400 hover:text-white underline cursor-pointer"
+                          >
+                            Limpiar finalizados
+                          </button>
+                        )}
+
+                        {/* Descartar todo si ya no hay uploads pendientes */}
+                        {!isProcessingQueue && uploadQueue.length > 0 && (
+                          <button
+                            type="button"
+                            onClick={handleClearAllQueue}
+                            className="text-[11px] text-slate-500 hover:text-rose-400 cursor-pointer"
+                          >
+                            Cerrar cola
+                          </button>
+                        )}
+                      </div>
                     </div>
 
-                    <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
+                    <div className="space-y-1.5 max-h-56 overflow-y-auto pr-1">
                       {uploadQueue.map((item) => (
                         <div
                           key={item.id}
@@ -759,7 +840,18 @@ export const AdminControlConsole: React.FC = () => {
                               </span>
                             )}
                             {item.status === 'error' && (
-                              <span className="text-rose-400 font-bold">{item.errorMessage || 'Error'}</span>
+                              <div className="flex items-center gap-2">
+                                <span className="text-rose-400 font-bold">{item.errorMessage || 'Error'}</span>
+                                <button
+                                  type="button"
+                                  onClick={() => handleRetrySingleUpload(item.id)}
+                                  className="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-[#F8C62B] hover:text-black text-slate-200 text-[10px] font-bold flex items-center gap-1 transition-colors cursor-pointer"
+                                  title="Reintentar esta fotografía"
+                                >
+                                  <RotateCw size={11} />
+                                  <span>Reintentar</span>
+                                </button>
+                              </div>
                             )}
                           </div>
                         </div>

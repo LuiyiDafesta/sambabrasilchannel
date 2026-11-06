@@ -5,6 +5,10 @@
  * and returns Cloudflare CDN URLs (minimizing egress fees).
  */
 
+@set_time_limit(180);
+@ini_set('max_execution_time', '180');
+@ini_set('memory_limit', '256M');
+
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With');
@@ -182,21 +186,29 @@ function uploadSigV4($host, $bucket, $region, $accessKey, $secretKey, $objectKey
         "Content-Length: " . strlen($payload)
     ];
 
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $url);
-    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_TIMEOUT, 60);
+    // Attempt up to 2 times in case of transient S3 socket/reset errors
+    for ($attempt = 1; $attempt <= 2; $attempt++) {
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'PUT');
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 60);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 15);
 
-    $response = curl_exec($ch);
-    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    $curlErr = curl_error($ch);
-    curl_close($ch);
+        $response = curl_exec($ch);
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curlErr = curl_error($ch);
+        curl_close($ch);
 
-    if ($httpCode >= 200 && $httpCode < 300) {
-        return true;
+        if ($httpCode >= 200 && $httpCode < 300) {
+            return true;
+        }
+
+        if ($attempt < 2) {
+            usleep(300000); // 300ms pause before retry
+        }
     }
 
     $errorMsg = "HTTP {$httpCode} - {$response} - {$curlErr}";
