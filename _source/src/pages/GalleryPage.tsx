@@ -292,7 +292,7 @@ export const GalleryPage: React.FC = () => {
                     Encontrá las fotos profesionales, retratos individuales y panorámicas exclusivas en DreamsCDA.
                   </p>
                   <a
-                    href="https://dreamscda.com.ar/"
+                    href="https://fotos.dreamscda.com.ar"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 bg-[#159447] hover:bg-[#117739] text-white font-outfit font-black text-xs sm:text-sm uppercase tracking-wider px-8 py-3.5 rounded-xl shadow-lg shadow-[#159447]/30 transition-all cursor-pointer"

@@ -260,7 +260,7 @@ export const HomePage: React.FC = () => {
               </p>
 
               <a
-                href="https://dreamscda.com.ar/"
+                href="https://fotos.dreamscda.com.ar"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2.5 bg-[#F8C62B] hover:bg-[#e4b21e] text-black font-outfit font-black text-xs sm:text-sm uppercase tracking-wider px-8 py-4 rounded-xl shadow-lg shadow-[#F8C62B]/25 transform hover:-translate-y-0.5 transition-all cursor-pointer"
